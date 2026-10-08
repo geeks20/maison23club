@@ -8,8 +8,10 @@ const mailer = createMailer(env);
 
 if (pool) {
   try {
-    await migrate(pool);
-    console.log('[db] schema ready');
+    // Schema changes go over a direct (unpooled) connection when one is provided, as Neon recommends.
+    const direct = env.DATABASE_URL_UNPOOLED ? createPool(env.DATABASE_URL_UNPOOLED, { max: 1 }) : null;
+    try { await migrate(direct || pool); } finally { if (direct) await direct.end(); }
+    console.log(`[db] schema ready${direct ? ' (direct connection)' : ''}`);
   } catch (e) {
     // Keep serving the public site; the API reports the database as unavailable.
     console.error('[db] migration failed:', e.message);

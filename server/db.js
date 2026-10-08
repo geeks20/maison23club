@@ -3,11 +3,25 @@ import { readFile } from 'node:fs/promises';
 
 const SCHEMA_URL = new URL('./schema.sql', import.meta.url);
 
-export function createPool(connectionString) {
+/**
+ * Postgres pool. In production this is Neon: use the pooled (-pooler) connection string
+ * for the app. TLS comes from `sslmode=require` in Neon's URLs; local dev runs without it.
+ * The app only uses transaction-scoped features (pg_advisory_xact_lock, no SET/LISTEN),
+ * so it is safe behind Neon's PgBouncer transaction pooling.
+ */
+export function createPool(connectionString, { max = 10 } = {}) {
   if (!connectionString) return null;
-  // Railway's private network (postgres.railway.internal) and local dev run without TLS.
-  // Add ?sslmode=require to the URL to force it (e.g. when connecting over the public proxy).
-  return new pg.Pool({ connectionString, max: 10 });
+  return new pg.Pool({
+    // Neon issues sslmode=require; ask explicitly for full certificate verification (pg's
+    // current behaviour, and what upcoming pg versions will need spelled out).
+    connectionString: connectionString.replace(/([?&])sslmode=(require|prefer|verify-ca)\b/, '$1sslmode=verify-full'),
+    max,
+    // Neon scales to zero when idle; the first connection can take a moment to wake it.
+    connectionTimeoutMillis: 15000,
+    // Drop idle clients before the pooler/proxy does, so we never reuse a dead socket.
+    idleTimeoutMillis: 30000,
+    keepAlive: true
+  });
 }
 
 export async function migrate(pool) {

@@ -25,9 +25,10 @@
 | | Status |
 |---|---|
 | **Live site (today)** | **Version 1**: the original static site. Online at `maison23.club` and `maison23-production.up.railway.app`. |
-| **Version 2** | **Built and tested, not deployed.** On the GitHub branch `v2`. Needs a database on Railway, plus your approval to go live. |
+| **Version 2** | **Built and tested, not deployed.** On the GitHub branch `v2`. The **Neon** database is created and tested; going live needs your approval. |
 | **RSVPs on the live site** | ⚠️ **Not collected.** V1 saves replies only in each guest's own browser. **Don't send invitations until V2 is live.** |
-| **Automated tests (V2)** | **31 / 31 passing.** Every invitation, RSVP, host, email and security check runs against a real Postgres database. |
+| **Database** | **Neon** project `maison23` (Singapore). The `production` branch is ready for the live site; the `dev` branch is for testing. |
+| **Automated tests (V2)** | **31 / 31 passing**, both on local Postgres and on **Neon**. Every invitation, RSVP, host, email and security check. |
 | **Browser checks (V2)** | **33 / 33 passing** in real Chrome: the phone RSVP flow and the desktop host dashboard. |
 | **Email** | Built for Resend. **Waiting for your Resend account.** Off by default. |
 | **Logo** | ⚠️ **Approved M23 monogram and wordmark files aren't in the project.** Please send them. Nothing has been invented in their place. |
@@ -77,6 +78,20 @@
 13. Wrote 31 automated tests and ran the guest and host flows in real Chrome (section 6).
 14. **Did all V2 work on a separate branch, `v2`**, pushed to GitHub. Railway deploys only `main`, so production hasn't changed.
 
+### Phase 4 — Neon database
+15. **Created the Neon project `maison23`** in your *Emam* organization:
+    - region `aws-ap-southeast-1` (Singapore), Postgres 17, database `maison23`
+    - branches: `production` (live) and `dev` (testing)
+16. **Configured the app the way Neon recommends:**
+    - app traffic uses the **pooled** connection
+    - schema setup uses the **direct** connection
+    - strict TLS (`verify-full`)
+    - timeouts that handle scale-to-zero wake-up
+17. **Verified on Neon:**
+    - all 31 tests pass
+    - 12 guests replying "yes" at the same moment against a capacity of 5 → exactly 5 accepted, through the pooler
+    - the phone RSVP flow works end to end
+
 ---
 
 ## 3. Where things live
@@ -85,6 +100,7 @@
 |---|---|
 | Code | <https://github.com/geeks20/maison23club>: `main` (live V1), `v2` (new version) |
 | Hosting | Railway project **maison23club**, service **maison23**, auto-deploys from `main` |
+| Database | Neon project **maison23** (`snowy-art-54837808`), Singapore. Branches `production` and `dev` |
 | Railway URL | <https://maison23-production.up.railway.app> |
 | Domain DNS | Cloudflare, zone **maison23.club** |
 | Local project | `~/Documents/softwares/Maison 23` |
@@ -359,7 +375,7 @@ I checked the live V1 code and its behaviour directly, without assuming anything
 - **No Content-Security-Policy violations or script errors** in either flow.
 
 ### ⏳ Not tested yet (needs real services or your approval)
-- **15. Production deploy of V2:** needs Railway Postgres and the merge to `main`. Checked locally only: build, start-up and health check.
+- **15. Production deploy of V2:** needs the Neon variables on Railway and the merge to `main`. Checked locally against Neon: start-up, schema setup, health check, guest and host flows.
 - **A real email send through Resend, and real webhooks:** waiting for your Resend account and domain verification.
 - **Real phones** (iOS Safari, Android Chrome), a screen reader, and load testing.
 - **Photos:** none supplied yet, so the photo layouts were checked only with empty frames.
@@ -368,11 +384,16 @@ I checked the live V1 code and its behaviour directly, without assuming anything
 
 ## 7. V2 — D. Setup instructions
 
-### Database (Railway Postgres)
-1. In the project folder, run `railway add --database postgres`, or in the Railway dashboard choose **New → Database → PostgreSQL**. *This adds a paid resource to your Railway project.*
-2. On the **maison23** service, open **Variables** and add `DATABASE_URL = ${{Postgres.DATABASE_URL}}`.
-3. Nothing else is needed. The tables are created automatically on first start.
-4. **Backups:** turn on Railway's Postgres backups before inviting guests.
+### Database (Neon) ✅ created
+- **Project:** `maison23` (`snowy-art-54837808`), region **Singapore**, Postgres 17, database `maison23`.
+- **Branches:** `production` holds real guests; `dev` is for testing and can be reset at any time.
+- **Railway variables to set at go-live** (values from the Neon console → Connect, or the CLI):
+  - `DATABASE_URL` = the **pooled** `production` string (host contains `-pooler`)
+  - `DATABASE_URL_UNPOOLED` = the **direct** `production` string
+  - CLI: `neon connection-string production --project-id snowy-art-54837808 --database-name maison23 --pooled` (drop `--pooled` for the direct one)
+- **Tables are created automatically on first start.** That step only adds tables and never deletes data.
+- **Backups:** Neon keeps 24 hours of point-in-time history. Before risky changes, create a branch, which is an instant copy.
+- **Speed: run Railway in Singapore too.** Railway currently runs the app in **us-west2 (Oregon)**. From there, each RSVP makes several round trips to Singapore and would take about 1–2 seconds. With the app in Singapore, it takes a few milliseconds. In Railway → service → **Settings → Regions**, choose **Southeast Asia (Singapore)**.
 
 ### Host login
 - Set `ADMIN_PASSWORD` on Railway to a long random passphrase (at least 12 characters).
@@ -399,7 +420,8 @@ I checked the live V1 code and its behaviour directly, without assuming anything
 
 | Variable | Value |
 |---|---|
-| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+| `DATABASE_URL` | Neon `production` **pooled** string |
+| `DATABASE_URL_UNPOOLED` | Neon `production` **direct** string |
 | `ADMIN_PASSWORD` | your passphrase |
 | `PUBLIC_BASE_URL` | `https://maison23.club` |
 | `EMAIL_MODE` | `off` → `test` → `live` |
@@ -410,7 +432,7 @@ I checked the live V1 code and its behaviour directly, without assuming anything
 | `RESEND_WEBHOOK_SECRET` | `whsec_…` from Resend |
 
 ### Going live with V2
-Merge the `v2` branch into `main`. Railway then deploys automatically. The health check at `/api/health` passes only once the database is connected, so a broken deploy won't replace the working site.
+Set the Neon variables above, move the Railway region to Singapore, then merge the `v2` branch into `main`. Railway then deploys automatically. The health check at `/api/health` passes only once the database is connected, so a broken deploy won't replace the working site.
 
 ### Local development
 ```sh
@@ -433,9 +455,11 @@ npm test
 - [x] Countdown fixed to Dubai time
 - [x] Security headers, rate limits, server-side authentication, CSRF protection
 - [x] Documentation (`README.md`, `.env.example`, this report)
+- [x] Neon database (`production` + `dev` branches), tested end to end
 
 ### ⚙️ Still needs configuration
-- [ ] **Railway Postgres + `DATABASE_URL`**
+- [ ] **Neon `production` connection strings on Railway** (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`)
+- [ ] **Railway region → Singapore** (next to the database)
 - [ ] **`ADMIN_PASSWORD`** and **`PUBLIC_BASE_URL`** on Railway
 - [ ] **Resend:** account, domain verification (DNS in Cloudflare), API key, webhook
 - [ ] **`www.maison23.club`:** the record is gone. Re-add `CNAME www → xwcbyenj.up.railway.app` (DNS only), or redirect `www` to the root domain in Cloudflare.
@@ -444,7 +468,7 @@ npm test
 - [ ] **Delete the Cloudflare API token** in Cloudflare once you no longer need it. The current one **never expires**. Then remove `env.local`.
 
 ### 🔐 Needs your approval
-- [ ] **Add the Railway Postgres database** (a paid resource)
+- [x] **Database: Neon** (created on your plan, project `maison23`)
 - [ ] **Merge `v2` → `main`**, which deploys V2 to production
 - [ ] **Turn on `EMAIL_MODE=test`**, then **`live`**
 - [ ] **Send the first real invitations.** I recommend 1–2 trusted guests first.
@@ -464,7 +488,7 @@ npm test
 - **Email:** the site asks a mail company (Resend) to deliver your invitation. "Sent" means Resend accepted it; "Delivered" only appears when Resend confirms it arrived. There's a **test mode** that sends everything only to you.
 - **WhatsApp:** the dashboard writes the message for you; you send it yourself and tick "sent".
 - **The venue** stays secret until you flip a switch. Even then, only guests who said "I'll be there" can see it.
-- **Railway** runs the website. **GitHub** keeps every version of the code. **Cloudflare** is the address book that points `maison23.club` to Railway.
+- **Neon** keeps the guest book (the database) safe in Singapore. **Railway** runs the website. **GitHub** keeps every version of the code. **Cloudflare** is the address book that points `maison23.club` to Railway.
 - **Tests** are a robot guest and a robot host clicking through everything to make sure nothing breaks. 31 automated checks and 33 browser checks all pass.
 
 ---
@@ -474,7 +498,9 @@ npm test
 | Term | Meaning |
 |---|---|
 | **Branch** | A parallel copy of the code. `main` = live; `v2` = the new version waiting for approval. |
-| **Database (Postgres)** | Where guests, replies and history are stored safely on the server. |
+| **Database (Neon Postgres)** | Where guests, replies and history are stored safely. Neon hosts it in Singapore. |
+| **Pooled / direct connection** | Two ways into the database: pooled for the app's everyday traffic, direct for setting up tables. |
+| **Neon branch** | An instant copy of the database, used for testing without touching real guests. |
 | **Token** | The random part of a personal invitation link. |
 | **CNAME record** | A DNS entry that says "this name points to that server". |
 | **Proxied (orange cloud)** | Cloudflare sits in front of the site. DNS only (grey) points straight to Railway. |
