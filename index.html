@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAISON 23 — La nuit est à nous.</title>
+<meta name="description" content="Une soirée privée. Dubai — 23 octobre 2026. Paris × Kinshasa × Port-au-Prince × Dubai.">
+<meta property="og:title" content="MAISON 23 — La nuit est à nous.">
+<meta property="og:description" content="Une soirée privée. Dubai — vendredi 23 octobre 2026. Sur invitation uniquement.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="og-maison23.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#171016">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="image-slot.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body class="gated">
+
+<!-- ENTRY GATE -->
+<div id="gate" class="gate" role="dialog" aria-label="MAISON 23 — entrée">
+  <div class="gate-frame" aria-hidden="true"></div>
+  <div class="gate-top"><span>N° 23</span><span>SUR INVITATION</span></div>
+  <div class="gate-kicker">UNE SOIRÉE PRIVÉE</div>
+  <h1 id="gate-title" class="gate-title" aria-label="MAISON 23"></h1>
+  <div class="gate-tagline">La nuit est à nous.</div>
+  <div class="gate-date">DUBAI — 23 OCTOBRE 2026</div>
+  <div class="gate-actions">
+    <button type="button" class="btn-gate" data-enter>ENTRER DANS LA MAISON</button>
+    <button type="button" class="btn-gate-sound" data-enter-sound>ENTRER AVEC LE SON AMBIANT</button>
+  </div>
+  <div class="gate-cities">PARIS · KINSHASA · PORT-AU-PRINCE · DUBAI</div>
+</div>
+
+<!-- NAV -->
+<nav class="nav" aria-label="Chapitres">
+  <a href="#cover" class="nav-logo">MAISON <em>23</em></a>
+  <div class="nav-links">
+    <a href="#histoire">HISTOIRE</a><a href="#villes">VILLES</a><a href="#son">LE SON</a><a href="#sape">LA SAPE</a><a href="#nuit">LA NUIT</a><a href="#lieu">LE LIEU</a>
+  </div>
+  <div class="nav-right">
+    <button type="button" id="sound-toggle" class="sound-btn" aria-pressed="false" aria-label="Son ambiant">
+      <span class="sound-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span id="sound-label">SON OFF</span>
+    </button>
+    <a href="#rsvp" class="nav-rsvp">RSVP</a>
+  </div>
+</nav>
+
+<main>
+<!-- 00 COVER -->
+<section id="cover" class="cover">
+  <div class="cover-meta">
+    <span>N° 23 — ÉDITION PRIVÉE</span><span>VENDREDI 23.10.2026</span><span>DUBAI, UAE</span>
+  </div>
+  <h1 class="cover-title">MAISON</h1>
+  <div class="cover-grid">
+    <div class="cover-portrait">
+      <image-slot id="cover-portrait" placeholder="Cover — warm flash portrait, evening wear, deep shadow"></image-slot>
+      <div class="cover-label">EN COUVERTURE</div>
+    </div>
+    <div class="cover-copy">
+      <div class="cover-23">23</div>
+      <p class="cover-tagline">La nuit est à nous.<br><span>The night belongs to us.</span></p>
+      <p class="cover-lede">A private birthday, one night only. Paris × Kinshasa × Port-au-Prince × Dubai — the music, the style, the people.</p>
+      <div class="countdown" aria-live="off">
+        <div id="countdown-label" class="countdown-label">AVANT L’OUVERTURE DES PORTES — 20:00 GST</div>
+        <div class="countdown-grid">
+          <div><span id="cd-d" class="cd-num">00</span><span class="cd-unit">JOURS</span></div>
+          <div><span id="cd-h" class="cd-num">00</span><span class="cd-unit">HEURES</span></div>
+          <div><span id="cd-m" class="cd-num">00</span><span class="cd-unit">MIN</span></div>
+          <div><span id="cd-s" class="cd-num gold">00</span><span class="cd-unit">SEC</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 STORY -->
+<section id="histoire" class="story">
+  <div data-reveal="0" class="kicker kicker-burgundy story-kicker">CHAPITRE 01 — L'HISTOIRE</div>
+  <h2 data-reveal="80" class="story-title">Not just another <em>birthday.</em></h2>
+  <div class="story-grid">
+    <div data-reveal="0" class="story-figure">
+      <div class="story-photo">
+        <image-slot id="story-dinner" placeholder="Candlelit table, close crop — hands, glasses, warm light"></image-slot>
+      </div>
+      <div class="story-caption">FIG. I — LE DÎNER, 21:00</div>
+    </div>
+    <div class="story-text">
+      <p data-reveal="0">This year, I wanted to do something different.</p>
+      <p data-reveal="0" class="muted">Not just dinner. Not just another night out.</p>
+      <p data-reveal="0">I wanted to bring together the music I love, the people I love, and the cultures that have inspired me.</p>
+      <p data-reveal="0">So for one night, we're creating our own little world in Dubai.</p>
+      <p data-reveal="0" class="story-welcome">Welcome to MAISON 23.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 FOUR CITIES -->
+<section id="villes" class="cities">
+  <div class="section-head cities-head">
+    <div class="section-head-left">
+      <div data-reveal="0" class="kicker">CHAPITRE 02 — L'ITINÉRAIRE</div>
+      <h2 data-reveal="80" class="h2-xl">Four cities,<br><em>one night.</em></h2>
+    </div>
+    <p data-reveal="160" class="section-aside">One room, four chapters. The night travels through the sounds that made us — scroll and follow it.</p>
+  </div>
+
+  <article class="city city-paris">
+    <div class="city-col">
+      <div class="city-meta"><span>I / IV</span><span>22:00</span><span>48.85° N</span></div>
+      <h3 class="city-name">Paris</h3>
+      <p class="city-line">The beginning of the night.</p>
+      <p class="city-genres">French R&amp;B · Afro-pop · Rap</p>
+      <p class="city-artists">Aya Nakamura, Tayc, Dadju, Tiakola, Franglish, Gims.</p>
+      <div class="city-tags"><span>ROMANTIC</span><span>FASHIONABLE</span><span>ENERGETIC</span></div>
+    </div>
+    <div class="city-photo">
+      <image-slot id="city-paris" placeholder="Paris — flash photo, Haussmann stairwell, satin and tailoring"></image-slot>
+    </div>
+  </article>
+
+  <article class="city city-kinshasa">
+    <div class="city-meta"><span>II / IV — 23:00</span><span>4.32° S</span></div>
+    <h3 class="city-name">KINSHASA</h3>
+    <div class="kin-grid">
+      <div class="kin-photo">
+        <image-slot id="city-kinshasa" placeholder="Kinshasa — sapeurs in motion, colour and confidence"></image-slot>
+      </div>
+      <div class="city-col-tight">
+        <p class="city-line">The rhythm gets stronger.</p>
+        <p class="city-genres">Rumba · Soukous · Ndombolo</p>
+      </div>
+      <div class="city-col-tight">
+        <p class="city-artists">Fally Ipupa, Koffi Olomidé, Ferre Gola, Awilo Longomba.</p>
+        <p class="city-mood">EXPRESSIVE — JOYFUL — FULL OF MOVEMENT</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="city city-pap">
+    <div class="pap-photo">
+      <image-slot id="city-pap" placeholder="Port-au-Prince — couple dancing kompa, warm tungsten light"></image-slot>
+    </div>
+    <div class="city-col">
+      <div class="city-meta">III / IV — 00:15 — 18.54° N</div>
+      <h3 class="city-name">Port-<br>au-Prince</h3>
+      <p class="city-line">The room gets warmer.</p>
+      <p class="city-genres">Kompa · Caribbean · Afro-love</p>
+      <p class="city-artists">Joé Dwèt Filé, Klass, Harmonik, Carimi.</p>
+      <p class="city-mood">INTIMATE — ROMANTIC — DANCE-FOCUSED</p>
+    </div>
+  </article>
+
+  <article class="city city-dubai">
+    <div class="city-meta">IV / IV — 01:00 — 25.20° N</div>
+    <div class="dubai-sum"><span>Paris</span><span>+</span><span>Kinshasa</span><span>+</span><span>Port-au-Prince</span><span>=</span></div>
+    <h3 class="city-name">DUBAI</h3>
+    <p class="city-line">Everything comes together.</p>
+    <p class="city-genres">French Afro · Congo · Kompa · Afrobeats · Amapiano</p>
+    <p class="city-mood">ENERGETIC — UNFORGETTABLE — NO BOUNDARIES</p>
+    <p class="dubai-note">The artists named across these chapters are musical inspirations — the sound we love — not performers on the night.</p>
+  </article>
+</section>
+
+<!-- 03 LE SON -->
+<section id="son" class="son">
+  <div class="section-head">
+    <div class="section-head-left">
+      <div data-reveal="0" class="kicker">CHAPITRE 03 — LE SON</div>
+      <h2 data-reveal="80" class="h2-lg">The sound of<br><em>MAISON 23</em></h2>
+    </div>
+    <div data-reveal="160" class="playlists">
+      <div class="playlists-label">LA PLAYLIST OFFICIELLE</div>
+      <div id="playlists" class="playlists-row"></div>
+    </div>
+  </div>
+  <ol id="artists" class="artists"></ol>
+  <p class="fineprint">Listen on your platform of choice. No audio is hosted here.</p>
+</section>
+
+<!-- 04 DRESS CODE -->
+<section id="sape" class="sape">
+  <div data-reveal="0" class="kicker kicker-burgundy">CHAPITRE 04 — LE DRESS CODE</div>
+  <h2 data-reveal="80" class="sape-title">La sape<br><em>après minuit</em></h2>
+  <p data-reveal="160" class="sape-lede">Parisian elegance. Congolese confidence. Caribbean warmth.</p>
+
+  <div id="palette" class="palette" role="radiogroup" aria-label="Palette de la soirée"></div>
+
+  <div class="mood-head">
+    <h3>Le moodboard</h3>
+    <div id="genders" class="tabs" role="tablist" aria-label="Inspiration"></div>
+  </div>
+  <div id="looks" class="looks"></div>
+  <p data-reveal="0" class="sape-quote">“Come looking like yourself, just a little more unforgettable.”</p>
+</section>
+
+<!-- 05 THE NIGHT -->
+<section id="nuit" class="nuit">
+  <div class="section-head nuit-head">
+    <div class="section-head-left">
+      <div data-reveal="0" class="kicker">CHAPITRE 05 — LA NUIT</div>
+      <h2 data-reveal="80" class="h2-xl">The <em>night.</em></h2>
+    </div>
+    <p data-reveal="160" class="nuit-note">Provisional timings — they'll be confirmed once venue arrangements are final.</p>
+  </div>
+  <ol id="timeline" class="timeline">
+    <div class="timeline-line" aria-hidden="true"></div>
+  </ol>
+</section>
+
+<!-- 06 RSVP -->
+<section id="rsvp" class="rsvp">
+  <div class="rsvp-head">
+    <div data-reveal="0" class="kicker">CHAPITRE 06 — L'INVITATION</div>
+    <h2 data-reveal="80" class="h2-lg">Répondez,<br><em>s'il vous plaît.</em></h2>
+    <p data-reveal="160" class="rsvp-lede">MAISON 23 is invitation-only. Use the personal link or code you received.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-frame" aria-hidden="true"></div>
+    <div class="card-top"><span>MAISON 23</span><span>23.10.2026</span></div>
+
+    <!-- Step 1: code -->
+    <form id="step-code" class="step step-code" novalidate>
+      <p class="card-title">Votre invitation.</p>
+      <label class="field">
+        <span class="field-label">CODE D'INVITATION</span>
+        <input id="code-input" class="input-code" placeholder="M23-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-invalid="false">
+      </label>
+      <p id="code-error" class="form-error" role="alert" hidden></p>
+      <button type="submit" class="btn-dark">OUVRIR L'INVITATION</button>
+      <p class="card-note">Prototype demo codes: <strong>M23-AMARA</strong> (2 places), <strong>M23-KEVIN</strong> (1 place), <strong>M23-OLD</strong> (revoked).</p>
+    </form>
+
+    <!-- Step 2: form -->
+    <form id="step-form" class="step step-form" hidden>
+      <div class="greet">
+        <p class="greet-title">Cher·e <em id="invite-first"></em>,</p>
+        <p id="alloc-text" class="greet-alloc"></p>
+        <p id="has-previous" class="greet-prev" hidden>You've already replied — update anything below.</p>
+      </div>
+      <label class="field">
+        <span class="field-label">NOM</span>
+        <input id="name-input" class="input-line" required autocomplete="name">
+      </label>
+      <fieldset class="field-set">
+        <legend class="field-label">PRÉSENCE</legend>
+        <div id="att-options" class="att-options"></div>
+      </fieldset>
+      <div id="count-row" class="count-row">
+        <span class="count-label"><span class="field-label">NOMBRE DE PERSONNES</span><span id="count-hint" class="count-hint"></span></span>
+        <div class="stepper">
+          <button type="button" id="dec" aria-label="Moins">−</button>
+          <span id="count" aria-live="polite">1</span>
+          <button type="button" id="inc" aria-label="Plus">+</button>
+        </div>
+      </div>
+      <label class="field">
+        <span class="field-label">RÉGIME ALIMENTAIRE <span class="opt">— OPTIONNEL</span></span>
+        <input id="dietary-input" class="input-line input-sm" maxlength="140" placeholder="Allergies, vegetarian, halal…">
+      </label>
+      <label class="field">
+        <span class="field-label">UN MOT POUR L'HÔTE <span class="opt">— OPTIONNEL</span></span>
+        <textarea id="message-input" class="input-area" maxlength="500" rows="3" placeholder="A song request, a memory, a joyeux anniversaire…"></textarea>
+      </label>
+      <p id="form-error" class="form-error" role="alert" hidden></p>
+      <div class="form-actions">
+        <button type="submit" id="submit-rsvp" class="btn-dark">ENVOYER MA RÉPONSE</button>
+        <button type="button" id="reset-code" class="btn-link">PAS VOUS ? CHANGER DE CODE</button>
+      </div>
+    </form>
+
+    <!-- Step 3: done -->
+    <div id="step-done" class="step step-done" role="status" hidden>
+      <p class="done-title">Merci,<br><em id="done-first"></em></p>
+      <p id="done-line" class="done-line"></p>
+      <div class="done-summary"><span id="done-att"></span><span id="done-count"></span></div>
+      <div class="done-actions">
+        <button type="button" id="add-cal" class="btn-dark btn-sm">AJOUTER AU CALENDRIER</button>
+        <button type="button" id="edit-rsvp" class="btn-outline">MODIFIER</button>
+        <button type="button" id="copy-invite" class="btn-outline">COPIER MON LIEN</button>
+      </div>
+      <p class="card-note">Your link is personal to you — please don't forward it.</p>
+    </div>
+  </div>
+  <p class="rsvp-disclaimer">Prototype: replies are stored on this device only, so nothing is sent to the host yet. In production, each reply is validated against the invitation on the server and saved to the database.</p>
+</section>
+
+<!-- 07 LOCATION -->
+<section id="lieu" class="lieu">
+  <div data-reveal="0" class="kicker">CHAPITRE 07 — LE LIEU</div>
+  <h2 data-reveal="80" class="lieu-title">Dubai,<br><em>UAE</em></h2>
+  <div class="lieu-grid">
+    <p data-reveal="0" class="lieu-lede">The address will be shared privately with confirmed guests.</p>
+    <div id="venue-visible" class="venue" hidden>
+      <span class="venue-kicker">POUR VOUS — CONFIRMÉ·E</span>
+      <span id="venue-name" class="venue-name"></span>
+      <span id="venue-address" class="venue-address"></span>
+      <span id="venue-notes" class="venue-notes"></span>
+    </div>
+    <div id="venue-hidden" data-reveal="120" class="venue-pending">
+      <span class="venue-kicker">FRIDAY 23 OCTOBER — FROM 20:00 GST</span>
+      <span>Confirm your RSVP and the venue details will appear here, on your personal invitation.</span>
+    </div>
+  </div>
+</section>
+
+<!-- 08 FINAL -->
+<section id="fin" class="fin">
+  <div class="fin-body">
+    <h2 data-reveal="0" class="fin-title">La nuit<br>est <em>à nous.</em></h2>
+    <div data-reveal="200" class="fin-meta"><span>MAISON 23</span><span class="gold">23.10.2026</span><span>DUBAI</span></div>
+    <div data-reveal="320" class="fin-actions">
+      <a href="#rsvp" class="btn-ivory">RÉPONDRE À L'INVITATION</a>
+      <button type="button" id="copy-site" class="btn-ghost">COPIER LE LIEN</button>
+    </div>
+  </div>
+  <footer class="footer">
+    <span>MAISON 23 — UNE SOIRÉE PRIVÉE</span>
+    <span>ARTISTS NAMED ARE MUSICAL INSPIRATIONS ONLY</span>
+    <a href="host.html">ESPACE HÔTE</a>
+  </footer>
+</section>
+</main>
+</body>
+</html>
