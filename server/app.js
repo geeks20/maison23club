@@ -1,5 +1,4 @@
 import express from 'express';
-import { readdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { tx, logActivity } from './db.js';
 import { getEvent, publicEvent, rsvpOpen } from './event.js';
@@ -9,7 +8,6 @@ import { adminRouter } from './admin.js';
 import { verifyResendWebhook, WEBHOOK_STATUS, shouldUpgrade } from './email.js';
 
 const PUBLIC_DIR = fileURLToPath(new URL('../public/', import.meta.url));
-const IMAGE_RE = /^[a-z0-9-]+\.(jpe?g|png|webp|avif)$/i;
 
 export function createApp({ pool, env = process.env, mailer }) {
   const app = express();
@@ -179,13 +177,6 @@ export function createApp({ pool, env = process.env, mailer }) {
       const g = await loadInvite(req.params.token);
       res.json(invitePayload(g, await getEvent(pool)));
     } catch (e) { next(e); }
-  });
-
-  // Only images that exist are listed, so pages never request missing files.
-  app.get('/images/manifest.json', async (_req, res) => {
-    let files = [];
-    try { files = (await readdir(PUBLIC_DIR + 'images')).filter(f => IMAGE_RE.test(f)); } catch { /* none */ }
-    res.set('Cache-Control', 'public, max-age=300').json(files);
   });
 
   // ---------- Host ----------

@@ -11,35 +11,37 @@
   ];
   const LOOKS = {
     elle: [
-      ['The satin dress', 'Bias-cut, close to the body, catching every light.', 'Satin slip dress, flash-lit'],
-      ['Fitted & elegant', 'Black, sharp, one strong detail.', 'Fitted evening look, full length'],
-      ['Tailoring, softened', 'An ivory suit with nothing underneath but gold.', 'Women’s tailored suit, wide trouser'],
-      ['Statement accessories', 'Sculptural gold, one bold earring, a cuff.', 'Gold jewellery close-up'],
-      ['Eveningwear, forward', 'A cape, a slit, an exposed shoulder.', 'Fashion-forward eveningwear'],
-      ['The finishing touch', 'A silk scarf in the hair, a long glove.', 'Detail — scarf, glove, brooch']
+      ['The satin dress', 'Bias-cut, close to the body, catching every light.', 'Satin slip dress, flash-lit', 'tall'],
+      ['Fitted & elegant', 'Black, sharp, one strong detail.', 'Fitted evening look, full length', 'portrait'],
+      ['Tailoring, softened', 'An ivory suit with nothing underneath but gold.', 'Women’s tailored suit, wide trouser', 'portrait'],
+      ['Statement accessories', 'Sculptural gold, one bold earring, a cuff.', 'Gold jewellery close-up', 'square'],
+      ['Eveningwear, forward', 'A cape, a slit, an exposed shoulder.', 'Fashion-forward eveningwear', 'portrait'],
+      ['The finishing touch', 'A silk scarf in the hair, a long glove.', 'Detail — scarf, glove, brooch', 'square']
     ],
     lui: [
-      ['Relaxed tailoring', 'Unstructured blazer, chocolate or black.', 'Relaxed men’s tailoring'],
-      ['Wide-leg trousers', 'Pleated, high-waisted, breaking on the loafer.', 'Wide-leg pleated trousers'],
-      ['The shirt', 'Silk, open collar, a print with intent.', 'Silk shirt, open collar'],
-      ['Loafers', 'Polished, horsebit, no socks if you dare.', 'Loafers, low angle'],
-      ['Gold accessories', 'A chain, a signet, a watch that catches light.', 'Gold chain and signet ring'],
-      ['The statement jacket', 'Burgundy velvet, or leather after midnight.', 'Velvet statement jacket']
+      ['Relaxed tailoring', 'Unstructured blazer, chocolate or black.', 'Relaxed men’s tailoring', 'tall'],
+      ['Wide-leg trousers', 'Pleated, high-waisted, breaking on the loafer.', 'Wide-leg pleated trousers', 'portrait'],
+      ['The shirt', 'Silk, open collar, a print with intent.', 'Silk shirt, open collar', 'portrait'],
+      ['Loafers', 'Polished, horsebit, no socks if you dare.', 'Loafers, low angle', 'square'],
+      ['Gold accessories', 'A chain, a signet, a watch that catches light.', 'Gold chain and signet ring', 'square'],
+      ['The statement jacket', 'Burgundy velvet, or leather after midnight.', 'Velvet statement jacket', 'portrait']
     ]
   };
+  // [name, city, genre, photo slot]
   const ARTISTS = [
-    ['Aya Nakamura', 'PARIS', 'AFRO-POP'], ['Tayc', 'PARIS', 'R&B · AFRO-LOVE'], ['Dadju', 'PARIS', 'R&B'],
-    ['Tiakola', 'PARIS', 'RAP · AFRO'], ['Franglish', 'PARIS', 'AFRO R&B'], ['Gims', 'PARIS', 'POP · RAP'],
-    ['Joé Dwèt Filé', 'PORT-AU-PRINCE', 'KOMPA · AFRO-LOVE'], ['Fally Ipupa', 'KINSHASA', 'RUMBA · NDOMBOLO']
+    ['Aya Nakamura', 'PARIS', 'AFRO-POP', 'aya-nakamura'], ['Tayc', 'PARIS', 'R&B · AFRO-LOVE', 'tayc'], ['Dadju', 'PARIS', 'R&B', 'dadju'],
+    ['Tiakola', 'PARIS', 'RAP · AFRO', 'tiakola'], ['Franglish', 'PARIS', 'AFRO R&B', 'franglish'], ['Gims', 'PARIS', 'POP · RAP', 'gims'],
+    ['Joé Dwèt Filé', 'PORT-AU-PRINCE', 'KOMPA · AFRO-LOVE', 'joe-dwet-file'], ['Fally Ipupa', 'KINSHASA', 'RUMBA · NDOMBOLO', 'fally-ipupa']
   ];
+  // [time, title, description, highlight, photo slot]
   const TIMELINE = [
-    ['20:00', 'BIENVENUE', 'Arrivals, drinks, French R&B'],
-    ['21:00', 'LE DÎNER', 'Food, conversations, good music'],
-    ['22:00', 'PARIS', 'French Afro and R&B'],
-    ['23:00', 'KINSHASA', 'Rumba, soukous, ndombolo'],
-    ['23:45', 'THE BIRTHDAY MOMENT', 'Cake, celebration, photos', true],
-    ['00:15', 'PORT-AU-PRINCE', 'Kompa and Caribbean sounds'],
-    ['01:00', 'MAISON 23', 'Everything comes together']
+    ['20:00', 'BIENVENUE', 'Arrivals, drinks, French R&B', false, 'tl-welcome'],
+    ['21:00', 'LE DÎNER', 'Food, conversations, good music', false, 'tl-dinner'],
+    ['22:00', 'PARIS', 'French Afro and R&B', false, 'tl-paris'],
+    ['23:00', 'KINSHASA', 'Rumba, soukous, ndombolo', false, 'tl-kinshasa'],
+    ['23:45', 'THE BIRTHDAY MOMENT', 'Cake, celebration, photos', true, 'tl-birthday'],
+    ['00:15', 'PORT-AU-PRINCE', 'Kompa and Caribbean sounds', false, 'tl-pap'],
+    ['01:00', 'MAISON 23', 'Everything comes together', false, 'tl-late']
   ];
   const ATT = {
     yes: ['I’ll be there', 'OUI', 'I’LL BE THERE'],
@@ -219,9 +221,13 @@
   }
 
   function renderArtists() {
+    // Licensed portraits where they exist; otherwise the initials keep the card typographic.
+    const initials = name => name.split(/\s+/).map(w => w[0]).join('').slice(0, 2);
     $('artists').replaceChildren(...ARTISTS.map((a, i) =>
       el('li', { class: 'artist', 'data-reveal': '0' },
         el('span', { class: 'artist-n' }, pad(i + 1)),
+        el('span', { class: 'artist-photo', 'data-initials': initials(a[0]) },
+          el('image-slot', { id: `artist-${a[3]}`, sizes: '(hover: hover) 240px, 64px', 'no-credit': '' })),
         el('span', { class: 'artist-name' }, a[0]),
         el('span', { class: 'artist-meta' }, el('span', {}, a[1]), el('span', {}, a[2])))
     ));
@@ -261,8 +267,9 @@
     if (container.dataset.gender !== state.gender) {
       container.dataset.gender = state.gender;
       container.replaceChildren(...items.map((l, i) =>
-        el('figure', { class: 'look' },
-          el('div', { class: 'look-photo', 'data-n': pad(i + 1) }, el('image-slot', { id: `look-${state.gender}-${i}`, placeholder: l[2], alt: l[0] })),
+        el('figure', { class: 'look', 'data-shape': l[3] },
+          el('div', { class: 'look-photo', 'data-n': pad(i + 1) },
+            el('image-slot', { id: `look-${state.gender}-${i}`, placeholder: l[2], sizes: '(min-width: 1100px) 30vw, (min-width: 640px) 45vw, 92vw' })),
           el('div', { class: 'look-bar' }),
           el('figcaption', {},
             el('span', { class: 'look-meta' }, el('span', {}, pad(i + 1)), el('span', { class: 'look-sw' })),
@@ -287,7 +294,8 @@
         el('span', { class: 'tl-dot' }),
         el('span', { class: 'tl-time' }, t[0]),
         el('span', { class: 'tl-title' }, t[1]),
-        el('span', { class: 'tl-desc' }, t[2]))
+        el('span', { class: 'tl-desc' }, t[2]),
+        el('span', { class: 'tl-photo' }, el('image-slot', { id: t[4], sizes: '(min-width: 860px) 160px, 80px', 'no-credit': '' })))
     ));
   }
 
@@ -493,6 +501,27 @@
     document.addEventListener('mouseleave', () => { c.style.opacity = '0'; });
   }
 
+  // Gentle parallax on large editorial photos: the frame stays put, the photo drifts a little.
+  function setupParallax() {
+    if (reduced || !matchMedia('(pointer: fine)').matches) return;
+    const frames = [...document.querySelectorAll('[data-parallax]')];
+    if (!frames.length) return;
+    document.documentElement.classList.add('px-on');
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const vh = innerHeight;
+      for (const f of frames) {
+        const r = f.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) continue;
+        const p = (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2); // -1 … 1 across the viewport
+        f.style.setProperty('--px', `${(p * -4).toFixed(2)}%`);
+      }
+    };
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
+
   let io;
   function setupReveal() {
     if (reduced || !window.IntersectionObserver) return;
@@ -539,5 +568,6 @@
   }
 
   setupCursor();
+  setupParallax();
   setTimeout(setupReveal, 300);
 })();

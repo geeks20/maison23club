@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
+<link rel="preload" href="/images/manifest.json" as="fetch" crossorigin>
 <script src="/image-slot.js" defer></script>
 <script src="/countdown.js" defer></script>
 <script src="/app.js" defer></script>
@@ -24,6 +25,7 @@
 
 <!-- ENTRY GATE -->
 <div id="gate" class="gate" role="dialog" aria-label="MAISON 23 — entrée">
+  <div class="gate-photo" aria-hidden="true"><image-slot id="gate-hero" priority decorative no-credit sizes="100vw"></image-slot></div>
   <div class="gate-frame" aria-hidden="true"></div>
   <div class="gate-top"><span>N° 23</span><span>PRIVATE SOCIETY</span></div>
   <div id="gate-kicker" class="gate-kicker">UNE SOIRÉE PRIVÉE</div>
@@ -75,7 +77,7 @@
   <h1 class="cover-title">MAISON</h1>
   <div class="cover-grid">
     <div class="cover-portrait">
-      <image-slot id="cover-portrait" placeholder="Cover — warm flash portrait, evening wear, deep shadow"></image-slot>
+      <image-slot id="cover-portrait" priority sizes="(min-width: 760px) 46vw, 100vw" placeholder="Cover — warm flash portrait, evening wear, deep shadow"></image-slot>
       <div class="cover-label">EN COUVERTURE</div>
     </div>
     <div class="cover-copy">
@@ -103,9 +105,10 @@
   <div class="story-grid">
     <div data-reveal="0" class="story-figure">
       <div class="story-photo">
-        <image-slot id="story-dinner" placeholder="Candlelit table, close crop — hands, glasses, warm light"></image-slot>
+        <image-slot id="story-dinner" sizes="(min-width: 760px) 44vw, 100vw" placeholder="Candlelit table, close crop — hands, glasses, warm light"></image-slot>
+        <div class="story-photo-sm"><image-slot id="story-friends" sizes="(min-width: 760px) 18vw, 40vw" placeholder="Friends celebrating — candid, natural"></image-slot></div>
       </div>
-      <div class="story-caption">FIG. I — LE DÎNER, 21:00</div>
+      <div class="story-caption">FIG. I — LE DÎNER, 21:00<span class="story-fig2"> · FIG. II — LES AMIS</span></div>
     </div>
     <div class="story-text">
       <p data-reveal="0">This year, I wanted to do something different.</p>
@@ -114,6 +117,10 @@
       <p data-reveal="0">So for one night, we're creating our own little world in Dubai.</p>
       <p data-reveal="0" class="story-welcome">Welcome to MAISON 23.</p>
     </div>
+  </div>
+  <div class="story-wide">
+    <div class="story-photo-wide"><image-slot id="story-guests" sizes="(min-width: 760px) 70vw, 100vw" placeholder="Fashionable guests, relaxed, private setting"></image-slot></div>
+    <div class="story-caption">FIG. III — LA MAISON, APRÈS MINUIT</div>
   </div>
 </section>
 
@@ -136,8 +143,11 @@
       <p class="city-artists">Aya Nakamura, Tayc, Dadju, Tiakola, Franglish, Gims.</p>
       <div class="city-tags"><span>ROMANTIC</span><span>FASHIONABLE</span><span>ENERGETIC</span></div>
     </div>
-    <div class="city-photo">
-      <image-slot id="city-paris" placeholder="Paris — flash photo, Haussmann stairwell, satin and tailoring"></image-slot>
+    <div class="city-photos">
+      <div class="city-photo" data-parallax>
+        <image-slot id="city-paris" sizes="(min-width: 760px) 520px, 100vw" placeholder="Paris — flash photo, Haussmann stairwell, satin and tailoring"></image-slot>
+      </div>
+      <div class="city-photo-sm"><image-slot id="city-paris-2" sizes="(min-width: 760px) 240px, 46vw" placeholder="Paris after dark — candid, fashionable"></image-slot></div>
     </div>
   </article>
 
@@ -145,10 +155,11 @@
     <div class="city-meta"><span>II / IV — 23:00</span><span>4.32° S</span></div>
     <h3 class="city-name">KINSHASA</h3>
     <div class="kin-grid">
-      <div class="kin-photo">
-        <image-slot id="city-kinshasa" placeholder="Kinshasa — sapeurs in motion, colour and confidence"></image-slot>
+      <div class="kin-photo" data-parallax>
+        <image-slot id="city-kinshasa" sizes="(min-width: 860px) 46vw, 100vw" placeholder="Kinshasa — sapeurs in motion, colour and confidence"></image-slot>
       </div>
       <div class="city-col-tight">
+        <div class="kin-photo-sm"><image-slot id="city-kinshasa-2" sizes="(min-width: 860px) 22vw, 46vw" placeholder="La sape — tailoring and attitude"></image-slot></div>
         <p class="city-line">The rhythm gets stronger.</p>
         <p class="city-genres">Rumba · Soukous · Ndombolo</p>
       </div>
@@ -160,8 +171,11 @@
   </article>
 
   <article class="city city-pap">
-    <div class="pap-photo">
-      <image-slot id="city-pap" placeholder="Port-au-Prince — couple dancing kompa, warm tungsten light"></image-slot>
+    <div class="pap-photos">
+      <div class="pap-photo" data-parallax>
+        <image-slot id="city-pap" sizes="(min-width: 760px) 480px, 100vw" placeholder="Port-au-Prince — couple dancing kompa, warm tungsten light"></image-slot>
+      </div>
+      <div class="pap-photo-sm"><image-slot id="city-pap-2" sizes="(min-width: 760px) 200px, 40vw" placeholder="Kompa — musicians, warm light"></image-slot></div>
     </div>
     <div class="city-col">
       <div class="city-meta">III / IV — 00:15 — 18.54° N</div>
@@ -174,6 +188,8 @@
   </article>
 
   <article class="city city-dubai">
+    <div class="dubai-photo" aria-hidden="true"><image-slot id="city-dubai" decorative sizes="100vw"></image-slot></div>
+    <div class="dubai-photo-sm"><image-slot id="city-dubai-2" sizes="220px"></image-slot></div>
     <div class="city-meta">IV / IV — 01:00 — 25.20° N</div>
     <div class="dubai-sum"><span>Paris</span><span>+</span><span>Kinshasa</span><span>+</span><span>Port-au-Prince</span><span>=</span></div>
     <h3 class="city-name">DUBAI</h3>
@@ -197,7 +213,7 @@
     </div>
   </div>
   <ol id="artists" class="artists"></ol>
-  <p class="fineprint">Listen on your platform of choice. No audio is hosted here.</p>
+  <p class="fineprint">Musical inspirations only — these artists are not performing on the night. Listen on your platform of choice; no audio is hosted here.</p>
 </section>
 
 <!-- 04 DRESS CODE -->
@@ -232,6 +248,7 @@
 
 <!-- 06 RSVP -->
 <section id="rsvp" class="rsvp">
+  <div class="rsvp-photo" aria-hidden="true"><image-slot id="rsvp-bg" decorative no-credit sizes="100vw"></image-slot></div>
   <div class="rsvp-head">
     <div data-reveal="0" class="kicker">CHAPITRE 06 — L'INVITATION</div>
     <h2 data-reveal="80" class="h2-lg">Répondez,<br><em>s'il vous plaît.</em></h2>
@@ -325,6 +342,10 @@
 <section id="lieu" class="lieu">
   <div data-reveal="0" class="kicker">CHAPITRE 07 — LE LIEU</div>
   <h2 data-reveal="80" class="lieu-title">Dubai,<br><em>UAE</em></h2>
+  <figure class="lieu-figure">
+    <div class="lieu-photo" data-parallax><image-slot id="lieu-atmos" sizes="100vw"></image-slot></div>
+    <figcaption class="lieu-caption">ATMOSPHÈRE — DUBAI APRÈS LA NUIT TOMBÉE. CE N’EST PAS LE LIEU DE LA SOIRÉE.</figcaption>
+  </figure>
   <div class="lieu-grid">
     <p data-reveal="0" class="lieu-lede">The address will be shared privately with confirmed guests.</p>
     <div id="venue-visible" class="venue" hidden>
@@ -355,6 +376,7 @@
     <a href="https://instagram.com/lamaison.society" target="_blank" rel="noopener noreferrer">@LAMAISON.SOCIETY</a>
     <a href="https://maison23.club">MAISON23.CLUB</a>
     <span>ARTISTS NAMED ARE MUSICAL INSPIRATIONS ONLY</span>
+    <a href="/credits">CRÉDITS PHOTO</a>
   </footer>
 </section>
 </main>

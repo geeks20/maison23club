@@ -366,21 +366,139 @@ body.menu-open { overflow: hidden; }
 .btn-dark:disabled { opacity: .6; }
 .venue-map { font-size: 10.5px; letter-spacing: .22em; color: var(--gold); }
 
-/* ---------- V2: photos not yet supplied ---------- */
-/* Editorial frames collapse until a photo exists, so guests never see wireframe boxes. */
-.cover-portrait:has(image-slot[empty]),
-.story-figure:has(image-slot[empty]),
-.city-photo:has(image-slot[empty]),
-.kin-photo:has(image-slot[empty]),
-.pap-photo:has(image-slot[empty]) { display: none; }
-.cover-grid:has(.cover-portrait image-slot[empty]) { align-items: center; }
-.cover-grid:has(.cover-portrait image-slot[empty]) .cover-copy { align-items: center; text-align: center; max-width: 720px; width: 100%; margin: 0 auto; }
-.cover-grid:has(.cover-portrait image-slot[empty]) .cover-lede { margin: 0 auto; }
-.cover-grid:has(.cover-portrait image-slot[empty]) .countdown { width: 100%; text-align: left; }
-.story-grid:has(.story-figure image-slot[empty]) { grid-template-columns: minmax(0, 1fr); }
-.story-grid:has(.story-figure image-slot[empty]) .story-text { padding-top: 0; max-width: 32ch; margin-left: auto; }
-@media (max-width: 859px) { .story-grid:has(.story-figure image-slot[empty]) .story-text { margin-left: 0; } }
-/* Moodboard cards without a photo become a tonal panel in the selected palette colour. */
+/* ---------- V3: photography ---------- */
+/* Every photo lives in a fixed-ratio frame, so nothing shifts while it loads. Frames whose
+   photo is not in the manifest collapse (image-slot[empty]); failed loads keep a tonal panel. */
+image-slot[failed] { background: linear-gradient(135deg, var(--burgundy), var(--choc)); }
+.px-on [data-parallax] { overflow: hidden; }
+.px-on [data-parallax] > image-slot { transform: translate3d(0, var(--px, 0), 0) scale(1.1); will-change: transform; }
+
+/* Entrance */
+.gate-photo { position: absolute; inset: 0; overflow: hidden; }
+.gate-photo image-slot { animation: m23drift 16s cubic-bezier(.2, .7, .1, 1) both; }
+.gate-photo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 75% 60% at 50% 52%, rgba(15, 10, 14, .42), rgba(15, 10, 14, .8)), linear-gradient(180deg, rgba(100, 40, 61, .16), rgba(15, 10, 14, .3)); }
+.gate > :not(.gate-photo) { z-index: 1; }
+.gate-kicker, .gate-title, .gate-guest, .gate-tagline, .gate-date, .gate-actions { position: relative; }
+@keyframes m23drift { from { transform: scale(1.08); } to { transform: none; } }
+
+/* 01 Story */
+.story-photo-sm { position: absolute; right: -6%; bottom: -12%; width: 42%; aspect-ratio: 4 / 5; border: clamp(5px, .8vw, 10px) solid var(--ivory); box-sizing: content-box; }
+.story-figure .story-photo { margin-bottom: 12%; }
+.story-figure:not(:has(.story-photo-sm image-slot[empty])) .story-caption { margin-top: 4px; }
+.story-wide { margin: clamp(56px, 8vw, 120px) 0 0 auto; width: min(100%, 1040px); display: flex; flex-direction: column; gap: 14px; }
+.story-photo-wide { position: relative; aspect-ratio: 3 / 2; overflow: hidden; }
+@media (max-width: 759px) { .story-photo-sm { right: -2%; width: 46%; } }
+
+/* 02 Cities */
+.city-photos { position: relative; justify-self: end; width: min(100%, 520px); }
+.city-photos .city-photo { width: 100%; }
+.city-photo-sm { position: absolute; left: -16%; bottom: -7%; width: 46%; aspect-ratio: 3 / 2; border: 6px solid var(--ivory); box-sizing: content-box; }
+.kin-photo { overflow: hidden; }
+.kin-photo-sm { position: relative; width: min(64%, 230px); aspect-ratio: 4 / 5; margin-bottom: 8px; }
+.pap-photos { position: relative; width: min(100%, 480px); }
+.pap-photos .pap-photo { width: 100%; }
+.pap-photo-sm { position: absolute; right: -8%; bottom: -6%; width: 36%; aspect-ratio: 4 / 5; border: 6px solid var(--choc); box-sizing: content-box; }
+.dubai-photo { position: absolute; inset: 0; z-index: 0; }
+.dubai-photo::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(15, 10, 14, .7), rgba(15, 10, 14, .9)); }
+.city-dubai > :not(.dubai-photo):not(.dubai-photo-sm) { position: relative; z-index: 1; }
+.dubai-photo-sm { position: absolute; z-index: 1; right: var(--pad-x); bottom: clamp(32px, 6vh, 64px); width: clamp(150px, 13vw, 210px); aspect-ratio: 4 / 5; border: 1px solid rgba(190, 154, 104, .5); padding: 6px; }
+.dubai-photo-sm image-slot { inset: 6px; }
+@media (max-width: 1099px) { .dubai-photo-sm { display: none; } }
+@media (max-width: 759px) {
+  .city-photo-sm { left: 0; bottom: -5%; width: 48%; }
+  .city-photos { margin-bottom: 8%; }
+  .pap-photo-sm { right: 0; }
+}
+
+/* 03 Le son — licensed portraits appear on hover; touch screens get a small thumbnail */
+.artist { position: relative; }
+.artist-photo { position: relative; overflow: hidden; background: var(--burgundy); }
+.artist-photo:has(image-slot[empty])::before { content: attr(data-initials); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-style: italic; color: var(--gold); }
+@media (hover: hover) and (pointer: fine) {
+  .artist-photo { position: absolute; z-index: 2; right: clamp(150px, 24vw, 380px); top: 50%; width: clamp(150px, 14vw, 220px); aspect-ratio: 4 / 5; opacity: 0; transform: translateY(-50%) rotate(-3deg) scale(.9); transition: opacity .45s, transform .7s var(--ease); pointer-events: none; box-shadow: 0 30px 60px -25px rgba(0, 0, 0, .7); }
+  .artist:hover .artist-photo { opacity: 1; transform: translateY(-50%) rotate(-1.5deg) scale(1); }
+  .artist-photo:has(image-slot[empty]) { display: none; }
+}
+@media (hover: none), (pointer: coarse) {
+  .artist { grid-template-columns: 56px minmax(0, 1fr); grid-template-areas: "ph n" "ph name" "ph meta"; align-items: center; column-gap: 16px; row-gap: 4px; }
+  .artist-n { grid-area: n; }
+  .artist-photo { grid-area: ph; width: 56px; aspect-ratio: 4 / 5; align-self: center; }
+  .artist-photo::before { font-size: 22px; }
+  .artist-name { grid-area: name; font-size: clamp(30px, 8vw, 56px); }
+  .artist-meta { grid-area: meta; flex-direction: row; gap: 10px; align-items: baseline; text-align: left; }
+}
+
+/* 04 Dress code — an editorial collage: varied frames, flowing columns */
+.looks { display: block; columns: 3 260px; column-gap: clamp(14px, 2.4vw, 32px); }
+.look { break-inside: avoid; margin: 0 0 clamp(28px, 4vw, 48px); }
 .look-photo { overflow: hidden; }
+.look[data-shape="tall"] .look-photo { aspect-ratio: 2 / 3; }
+.look[data-shape="portrait"] .look-photo { aspect-ratio: 3 / 4; }
+.look[data-shape="square"] .look-photo { aspect-ratio: 1 / 1; }
+.look[data-shape="wide"] .look-photo { aspect-ratio: 4 / 3; }
+.look-photo image-slot { transition: transform 1.4s var(--ease); }
+@media (hover: hover) { .look:hover .look-photo image-slot { transform: scale(1.035); } }
+@media (max-width: 559px) { .looks { columns: 1; } }
+
+/* 05 Night — small supporting photos */
+.tl-photo { position: relative; display: block; overflow: hidden; aspect-ratio: 4 / 5; }
+@media (min-width: 860px) { .tl-photo { width: 100%; max-width: 168px; margin-top: 10px; } }
+@media (max-width: 859px) {
+  .tl-item { display: grid; grid-template-columns: minmax(0, 1fr) 80px; column-gap: 18px; row-gap: 8px; align-items: start; }
+  .tl-item > .tl-time, .tl-item > .tl-title, .tl-item > .tl-desc { grid-column: 1; }
+  .tl-photo { grid-column: 2; grid-row: 1 / span 3; width: 80px; }
+}
+
+/* 06 RSVP — photographic warmth around the card, never behind the inputs */
+.rsvp { overflow: hidden; }
+.rsvp-photo { position: absolute; inset: 0; z-index: 0; }
+.rsvp-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(53, 37, 34, .9), rgba(100, 40, 61, .8) 45%, rgba(53, 37, 34, .94)); }
+.rsvp > :not(.rsvp-photo) { position: relative; z-index: 1; }
+
+/* 07 Location */
+.lieu-figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.lieu-photo { position: relative; aspect-ratio: 21 / 9; overflow: hidden; }
+.lieu-caption { font-size: 10px; letter-spacing: .24em; line-height: 1.6; color: rgba(242, 232, 216, .6); }
+@media (max-width: 759px) { .lieu-photo { aspect-ratio: 4 / 3; } }
+
+/* Missing photos: editorial frames collapse, so guests never see wireframe boxes. */
+.gate-photo:has(image-slot[empty]),
+.cover-portrait:has(image-slot[empty]),
+.story-figure:has(.story-photo > image-slot[empty]),
+.story-photo-sm:has(image-slot[empty]),
+.story-wide:has(image-slot[empty]),
+.city-photo:has(image-slot[empty]),
+.city-photo-sm:has(image-slot[empty]),
+.kin-photo:has(image-slot[empty]),
+.kin-photo-sm:has(image-slot[empty]),
+.pap-photo:has(image-slot[empty]),
+.pap-photo-sm:has(image-slot[empty]),
+.dubai-photo:has(image-slot[empty]),
+.dubai-photo-sm:has(image-slot[empty]),
+.tl-photo:has(image-slot[empty]),
+.rsvp-photo:has(image-slot[empty]),
+.lieu-figure:has(image-slot[empty]) { display: none; }
+.story-figure:has(.story-photo-sm image-slot[empty]) .story-fig2 { display: none; }
+.story-figure:has(.story-photo-sm image-slot[empty]) .story-photo { margin-bottom: 0; }
+.cover-grid:has(.cover-portrait image-slot[empty]) .cover-copy { max-width: 760px; }
+.story-grid:has(.story-photo > image-slot[empty]) .story-text { padding-top: 0; max-width: 30ch; }
+.city-photos:has(.city-photo image-slot[empty]) .city-photo-sm { position: relative; left: auto; bottom: auto; }
+.pap-photos:has(.pap-photo image-slot[empty]) .pap-photo-sm { position: relative; right: auto; bottom: auto; }
+/* Moodboard cards without a photo become a tonal panel in the selected palette colour. */
 .look-photo:has(image-slot[empty]) { aspect-ratio: 3 / 2; background: var(--look-tone, var(--burgundy)); transition: background .6s; }
 .look-photo:has(image-slot[empty])::after { content: attr(data-n); position: absolute; right: 14px; bottom: 6px; font-family: var(--serif); font-style: italic; font-size: 64px; line-height: 1; color: var(--look-fg, var(--ivory)); opacity: .55; }
+
+/* ---------- Credits page ---------- */
+body.credits { overflow: auto; }
+.credits-main { max-width: 980px; margin: 0 auto; padding: clamp(36px, 6vw, 72px) var(--pad-x) 96px; display: flex; flex-direction: column; gap: 28px; }
+.credits-main .nav-logo { align-self: flex-start; }
+.credits-lede { margin: 0; max-width: 62ch; font-size: 15px; line-height: 1.7; color: rgba(242, 232, 216, .78); }
+.credits-main h2 { margin: 24px 0 0; font-size: 10.5px; font-weight: 400; letter-spacing: .32em; color: var(--gold); text-transform: uppercase; }
+.credits-main ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.credits-main li { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 18px; align-items: start; padding: 16px 0; border-top: 1px solid rgba(190, 154, 104, .2); }
+.credits-main li img { width: 84px; height: auto; aspect-ratio: 4 / 5; object-fit: cover; display: block; background: var(--choc); }
+.credits-main li p { margin: 0 0 4px; font-size: 13px; line-height: 1.6; color: rgba(242, 232, 216, .78); overflow-wrap: anywhere; }
+.credits-main li .c-alt { color: var(--ivory); font-size: 14px; }
+.credits-main li .c-note { font-size: 12px; color: rgba(242, 232, 216, .55); }
+.credits-main li a { color: var(--gold); border-bottom: 1px solid rgba(190, 154, 104, .35); }
+.credits-foot { margin: 24px 0 0; font-size: 11px; letter-spacing: .24em; }
