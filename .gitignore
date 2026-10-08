@@ -2,3 +2,5 @@ design-source/
 .DS_Store
 env.local
 .env*
+node_modules/
+!.env.example

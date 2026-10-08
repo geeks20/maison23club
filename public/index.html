@@ -8,28 +8,32 @@
 <meta property="og:title" content="MAISON 23 — La nuit est à nous.">
 <meta property="og:description" content="Une soirée privée. Dubai — vendredi 23 octobre 2026. Sur invitation uniquement.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="og-maison23.jpg">
+<meta property="og:image" content="https://maison23.club/og-maison23.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#171016">
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<script src="image-slot.js" defer></script>
-<script src="app.js" defer></script>
+<link rel="stylesheet" href="/styles.css">
+<script src="/image-slot.js" defer></script>
+<script src="/countdown.js" defer></script>
+<script src="/app.js" defer></script>
 </head>
 <body class="gated">
 
 <!-- ENTRY GATE -->
 <div id="gate" class="gate" role="dialog" aria-label="MAISON 23 — entrée">
   <div class="gate-frame" aria-hidden="true"></div>
-  <div class="gate-top"><span>N° 23</span><span>SUR INVITATION</span></div>
-  <div class="gate-kicker">UNE SOIRÉE PRIVÉE</div>
+  <div class="gate-top"><span>N° 23</span><span>PRIVATE SOCIETY</span></div>
+  <div id="gate-kicker" class="gate-kicker">UNE SOIRÉE PRIVÉE</div>
   <h1 id="gate-title" class="gate-title" aria-label="MAISON 23"></h1>
+  <div id="gate-guest" class="gate-guest" hidden></div>
   <div class="gate-tagline">La nuit est à nous.</div>
-  <div class="gate-date">DUBAI — 23 OCTOBRE 2026</div>
+  <div id="gate-date" class="gate-date">DUBAI — 23 OCTOBRE 2026</div>
   <div class="gate-actions">
     <button type="button" class="btn-gate" data-enter>ENTRER DANS LA MAISON</button>
+    <button type="button" id="gate-rsvp" class="btn-gate-sound" data-enter-rsvp hidden>RÉPONDRE À L'INVITATION</button>
     <button type="button" class="btn-gate-sound" data-enter-sound>ENTRER AVEC LE SON AMBIANT</button>
   </div>
   <div class="gate-cities">PARIS · KINSHASA · PORT-AU-PRINCE · DUBAI</div>
@@ -47,8 +51,20 @@
       <span id="sound-label">SON OFF</span>
     </button>
     <a href="#rsvp" class="nav-rsvp">RSVP</a>
+    <button type="button" id="menu-toggle" class="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="Chapitres">
+      <span aria-hidden="true"></span><span aria-hidden="true"></span>
+    </button>
   </div>
 </nav>
+<div id="menu" class="menu" hidden>
+  <a href="#histoire"><span>01</span>L'histoire</a>
+  <a href="#villes"><span>02</span>Les villes</a>
+  <a href="#son"><span>03</span>Le son</a>
+  <a href="#sape"><span>04</span>La sape</a>
+  <a href="#nuit"><span>05</span>La nuit</a>
+  <a href="#rsvp"><span>06</span>L'invitation</a>
+  <a href="#lieu"><span>07</span>Le lieu</a>
+</div>
 
 <main>
 <!-- 00 COVER -->
@@ -66,14 +82,15 @@
       <div class="cover-23">23</div>
       <p class="cover-tagline">La nuit est à nous.<br><span>The night belongs to us.</span></p>
       <p class="cover-lede">A private birthday, one night only. Paris × Kinshasa × Port-au-Prince × Dubai — the music, the style, the people.</p>
-      <div class="countdown" aria-live="off">
-        <div id="countdown-label" class="countdown-label">AVANT L’OUVERTURE DES PORTES — 20:00 GST</div>
-        <div class="countdown-grid">
-          <div><span id="cd-d" class="cd-num">00</span><span class="cd-unit">JOURS</span></div>
-          <div><span id="cd-h" class="cd-num">00</span><span class="cd-unit">HEURES</span></div>
-          <div><span id="cd-m" class="cd-num">00</span><span class="cd-unit">MIN</span></div>
-          <div><span id="cd-s" class="cd-num gold">00</span><span class="cd-unit">SEC</span></div>
+      <div id="countdown" class="countdown is-loading" aria-live="off" aria-busy="true">
+        <div id="countdown-label" class="countdown-label">AVANT L’OUVERTURE DES PORTES — 20:00 DUBAI</div>
+        <div id="countdown-grid" class="countdown-grid">
+          <div><span id="cd-d" class="cd-num">··</span><span class="cd-unit">JOURS</span></div>
+          <div><span id="cd-h" class="cd-num">··</span><span class="cd-unit">HEURES</span></div>
+          <div><span id="cd-m" class="cd-num">··</span><span class="cd-unit">MIN</span></div>
+          <div><span id="cd-s" class="cd-num gold">··</span><span class="cd-unit">SEC</span></div>
         </div>
+        <p id="countdown-open" class="countdown-open" hidden>LA NUIT EST À NOUS.</p>
       </div>
     </div>
   </div>
@@ -218,39 +235,44 @@
   <div class="rsvp-head">
     <div data-reveal="0" class="kicker">CHAPITRE 06 — L'INVITATION</div>
     <h2 data-reveal="80" class="h2-lg">Répondez,<br><em>s'il vous plaît.</em></h2>
-    <p data-reveal="160" class="rsvp-lede">MAISON 23 is invitation-only. Use the personal link or code you received.</p>
+    <p data-reveal="160" class="rsvp-lede">MAISON 23 is invitation-only. Your reply goes through the personal link you received.</p>
   </div>
 
   <div class="card">
     <div class="card-frame" aria-hidden="true"></div>
     <div class="card-top"><span>MAISON 23</span><span>23.10.2026</span></div>
 
-    <!-- Step 1: code -->
-    <form id="step-code" class="step step-code" novalidate>
+    <!-- No personal link (or an invalid one): explain, and accept a pasted link -->
+    <form id="step-link" class="step step-code" novalidate>
       <p class="card-title">Votre invitation.</p>
+      <p id="link-intro" class="card-lede">MAISON 23 is invitation-only. Open the personal link from your invitation — or paste it here.</p>
       <label class="field">
-        <span class="field-label">CODE D'INVITATION</span>
-        <input id="code-input" class="input-code" placeholder="M23-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-invalid="false">
+        <span class="field-label">VOTRE LIEN PERSONNEL</span>
+        <input id="link-input" class="input-line" placeholder="maison23.club/invite/…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="link-error">
       </label>
-      <p id="code-error" class="form-error" role="alert" hidden></p>
+      <p id="link-error" class="form-error" role="alert" hidden></p>
       <button type="submit" class="btn-dark">OUVRIR L'INVITATION</button>
-      <p class="card-note">Prototype demo codes: <strong>M23-AMARA</strong> (2 places), <strong>M23-KEVIN</strong> (1 place), <strong>M23-OLD</strong> (revoked).</p>
     </form>
 
-    <!-- Step 2: form -->
+    <!-- Loading -->
+    <div id="step-loading" class="step step-loading" role="status" hidden>
+      <p class="card-title">Un instant…</p>
+      <p class="card-lede">Opening your invitation.</p>
+    </div>
+
+    <!-- Reply form -->
     <form id="step-form" class="step step-form" hidden>
       <div class="greet">
+        <p class="greet-kicker">YOU'RE INVITED TO MAISON 23</p>
         <p class="greet-title">Cher·e <em id="invite-first"></em>,</p>
+        <p class="greet-when">Friday, October 23, 2026 · 20:00 · Dubai, UAE</p>
         <p id="alloc-text" class="greet-alloc"></p>
+        <p id="deadline-text" class="greet-alloc" hidden></p>
         <p id="has-previous" class="greet-prev" hidden>You've already replied — update anything below.</p>
       </div>
-      <label class="field">
-        <span class="field-label">NOM</span>
-        <input id="name-input" class="input-line" required autocomplete="name">
-      </label>
       <fieldset class="field-set">
-        <legend class="field-label">PRÉSENCE</legend>
-        <div id="att-options" class="att-options"></div>
+        <legend class="field-label">SERAS-TU LÀ ? — WILL YOU BE THERE?</legend>
+        <div id="att-options" class="att-options" role="group"></div>
       </fieldset>
       <div id="count-row" class="count-row">
         <span class="count-label"><span class="field-label">NOMBRE DE PERSONNES</span><span id="count-hint" class="count-hint"></span></span>
@@ -271,24 +293,32 @@
       <p id="form-error" class="form-error" role="alert" hidden></p>
       <div class="form-actions">
         <button type="submit" id="submit-rsvp" class="btn-dark">ENVOYER MA RÉPONSE</button>
-        <button type="button" id="reset-code" class="btn-link">PAS VOUS ? CHANGER DE CODE</button>
+        <button type="button" id="cancel-edit" class="btn-link" hidden>ANNULER</button>
       </div>
     </form>
 
-    <!-- Step 3: done -->
-    <div id="step-done" class="step step-done" role="status" hidden>
+    <!-- Confirmation (only shown once the server has saved the reply) -->
+    <div id="step-done" class="step step-done" role="status" tabindex="-1" hidden>
       <p class="done-title">Merci,<br><em id="done-first"></em></p>
       <p id="done-line" class="done-line"></p>
       <div class="done-summary"><span id="done-att"></span><span id="done-count"></span></div>
+      <p id="done-dress" class="done-note" hidden></p>
+      <div id="done-venue" class="done-venue" hidden></div>
       <div class="done-actions">
         <button type="button" id="add-cal" class="btn-dark btn-sm">AJOUTER AU CALENDRIER</button>
         <button type="button" id="edit-rsvp" class="btn-outline">MODIFIER</button>
         <button type="button" id="copy-invite" class="btn-outline">COPIER MON LIEN</button>
       </div>
-      <p class="card-note">Your link is personal to you — please don't forward it.</p>
+      <p class="card-note">Your link is personal to you — please don't forward it. You can come back to it any time to change your reply.</p>
+    </div>
+
+    <!-- RSVP closed, no reply on file -->
+    <div id="step-closed" class="step step-done" hidden>
+      <p class="card-title">Les réponses sont closes.</p>
+      <p class="card-lede">RSVPs for MAISON 23 have closed. Please contact the host directly.</p>
     </div>
   </div>
-  <p class="rsvp-disclaimer">Prototype: replies are stored on this device only, so nothing is sent to the host yet. In production, each reply is validated against the invitation on the server and saved to the database.</p>
+  <p class="rsvp-disclaimer">Your reply is saved securely and seen only by the host.</p>
 </section>
 
 <!-- 07 LOCATION -->
@@ -301,11 +331,11 @@
       <span class="venue-kicker">POUR VOUS — CONFIRMÉ·E</span>
       <span id="venue-name" class="venue-name"></span>
       <span id="venue-address" class="venue-address"></span>
-      <span id="venue-notes" class="venue-notes"></span>
+      <a id="venue-map" class="venue-map" href="#" target="_blank" rel="noopener noreferrer" hidden>OUVRIR DANS GOOGLE MAPS →</a>
     </div>
     <div id="venue-hidden" data-reveal="120" class="venue-pending">
       <span class="venue-kicker">FRIDAY 23 OCTOBER — FROM 20:00 GST</span>
-      <span>Confirm your RSVP and the venue details will appear here, on your personal invitation.</span>
+      <span id="venue-pending-text">Confirm your RSVP and the venue details will appear here, on your personal invitation.</span>
     </div>
   </div>
 </section>
@@ -321,9 +351,10 @@
     </div>
   </div>
   <footer class="footer">
-    <span>MAISON 23 — UNE SOIRÉE PRIVÉE</span>
+    <span>MAISON 23 — PRIVATE SOCIETY</span>
+    <a href="https://instagram.com/lamaison.society" target="_blank" rel="noopener noreferrer">@LAMAISON.SOCIETY</a>
+    <a href="https://maison23.club">MAISON23.CLUB</a>
     <span>ARTISTS NAMED ARE MUSICAL INSPIRATIONS ONLY</span>
-    <a href="host.html">ESPACE HÔTE</a>
   </footer>
 </section>
 </main>

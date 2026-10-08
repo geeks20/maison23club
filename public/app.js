@@ -1,17 +1,7 @@
 (() => {
   'use strict';
 
-  // ---------- Data ----------
-  const K = { inv: 'maison23.v1.invites', rsvp: 'maison23.v1.rsvps', set: 'maison23.v1.settings', entered: 'maison23.entered' };
-  const SEED = [
-    { code: 'M23-AMARA', name: 'Amara Diallo', allocation: 2, revoked: false },
-    { code: 'M23-KEVIN', name: 'Kevin Mbuyi', allocation: 1, revoked: false },
-    { code: 'M23-NADEGE', name: 'Nadège Pierre', allocation: 2, revoked: false },
-    { code: 'M23-SOFIA', name: 'Sofia Benali', allocation: 1, revoked: false },
-    { code: 'M23-OLD', name: 'Ancien lien', allocation: 1, revoked: true }
-  ];
-  const TARGET = Date.parse('2026-10-23T20:00:00+04:00');
-
+  // ---------- Content ----------
   const PALETTE = [
     { name: 'BLACK', hex: '#171016', fg: '#F2E8D8', title: 'Noir', note: 'The foundation. Sharp, after-dark, always right.' },
     { name: 'BURGUNDY', hex: '#64283D', fg: '#F2E8D8', title: 'Bordeaux', note: 'The colour of the night. Satin, velvet, a lip.' },
@@ -51,14 +41,16 @@
     ['00:15', 'PORT-AU-PRINCE', 'Kompa and Caribbean sounds'],
     ['01:00', 'MAISON 23', 'Everything comes together']
   ];
-  const ATT = { yes: ['Oui', 'YES'], maybe: ['Peut-être', 'MAYBE'], no: ['Non', 'NO'] };
+  const ATT = {
+    yes: ['I’ll be there', 'OUI', 'I’LL BE THERE'],
+    maybe: ['Maybe', 'PEUT-ÊTRE', 'MAYBE'],
+    no: ['Can’t make it', 'NON', 'CAN’T MAKE IT']
+  };
+  const TOKEN_RE = /^[A-Za-z0-9_-]{32}$/;
 
   // ---------- Helpers ----------
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2, '0');
-  const first = n => (n || '').trim().split(/\s+/)[0] || '';
-  const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
-  const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
   const ssGet = k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
   const ssSet = (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} };
   const el = (tag, attrs, ...kids) => {
@@ -75,13 +67,33 @@
   };
   const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wideMQ = matchMedia('(min-width: 860px)');
+  const dubai = (iso, opts) => new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Dubai', ...opts }).format(new Date(iso));
+
+  async function api(path, opts = {}) {
+    let res;
+    try {
+      res = await fetch(path, {
+        ...opts,
+        headers: { Accept: 'application/json', ...(opts.body ? { 'Content-Type': 'application/json' } : {}) },
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+    } catch (e) {
+      return { ok: false, status: 0, data: { message: 'We couldn’t reach MAISON 23 — please check your connection and try again.' } };
+    }
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  }
 
   // ---------- State ----------
+  const pathMatch = location.pathname.match(/^\/invite\/([^/?#]+)\/?$/);
   const state = {
     sound: false, sw: 1, gender: 'elle',
-    code: '', invite: null, step: 'code', hasPrevious: false,
-    attendance: 'yes', count: 1, saving: false, done: null,
-    settings: {}
+    token: pathMatch && TOKEN_RE.test(pathMatch[1]) ? pathMatch[1] : null,
+    invite: null,          // server payload: { guest, rsvp, rsvpOpen, event, venue }
+    event: null,           // public event info
+    step: 'link',
+    attendance: null, count: 1, saving: false
   };
 
   // ---------- Gate ----------
@@ -97,17 +109,48 @@
     });
 
     const open = () => { gate.remove(); document.body.classList.remove('gated'); };
-    if (ssGet(K.entered) === '1') return open();
+    // A personal link always opens on the gate; the plain site remembers it for the session.
+    if (!state.token && ssGet('maison23.entered') === '1') return open();
 
-    const enter = withSound => {
-      ssSet(K.entered, '1');
+    const enter = (withSound, then) => {
+      ssSet('maison23.entered', '1');
       if (withSound && !state.sound) toggleSound();
-      if (reduced) return open();
+      const done = () => { open(); if (then) then(); };
+      if (reduced) return done();
       gate.classList.add('leaving');
-      setTimeout(open, 1150);
+      setTimeout(done, 1150);
     };
     gate.querySelector('[data-enter]').addEventListener('click', () => enter(false));
     gate.querySelector('[data-enter-sound]').addEventListener('click', () => enter(true));
+    gate.querySelector('[data-enter-rsvp]').addEventListener('click', () => enter(false, () => {
+      $('rsvp').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+    }));
+    gate.querySelector('[data-enter]').focus({ preventScroll: true });
+  }
+
+  function personaliseGate() {
+    const gate = $('gate');
+    if (!gate || !state.invite) return;
+    $('gate-kicker').textContent = 'YOU’RE INVITED TO MAISON 23';
+    $('gate-guest').textContent = state.invite.guest.name;
+    $('gate-guest').hidden = false;
+    $('gate-date').textContent = 'FRIDAY, OCTOBER 23, 2026 · DUBAI, UAE';
+    $('gate-rsvp').hidden = false;
+    if (state.invite.rsvp) $('gate-rsvp').textContent = 'VOIR MA RÉPONSE';
+  }
+
+  // ---------- Mobile menu ----------
+  function initMenu() {
+    const btn = $('menu-toggle'), menu = $('menu');
+    const set = open => {
+      btn.setAttribute('aria-expanded', String(open));
+      menu.hidden = !open;
+      document.body.classList.toggle('menu-open', open);
+    };
+    btn.addEventListener('click', () => set(menu.hidden));
+    menu.addEventListener('click', e => { if (e.target.closest('a')) set(false); });
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { set(false); btn.focus(); } });
+    wideMQ.addEventListener('change', () => set(false));
   }
 
   // ---------- Ambient sound (synthesised pad, no hosted audio) ----------
@@ -138,22 +181,35 @@
     } catch (e) { console.warn('Audio unavailable', e); }
   }
 
-  // ---------- Countdown ----------
-  function tick() {
-    const diff = Math.max(0, TARGET - Date.now());
-    $('cd-d').textContent = pad(Math.floor(diff / 864e5));
-    $('cd-h').textContent = pad(Math.floor(diff / 36e5) % 24);
-    $('cd-m').textContent = pad(Math.floor(diff / 6e4) % 60);
-    $('cd-s').textContent = pad(Math.floor(diff / 1e3) % 60);
-    $('countdown-label').textContent = diff > 0 ? 'AVANT L’OUVERTURE DES PORTES — 20:00 GST' : 'LA MAISON EST OUVERTE';
+  // ---------- Countdown (Asia/Dubai, 20:00 on 23 October 2026) ----------
+  let countdownTimer = null;
+  function startCountdown(targetIso) {
+    if (countdownTimer) clearInterval(countdownTimer);
+    if (targetIso) $('countdown-label').textContent = `AVANT L’OUVERTURE DES PORTES — ${dubai(targetIso, { hour: '2-digit', minute: '2-digit', hour12: false })} DUBAI`;
+    const box = $('countdown');
+    const tick = () => {
+      const c = window.M23Countdown.compute(targetIso, Date.now());
+      box.classList.remove('is-loading');
+      box.setAttribute('aria-busy', 'false');
+      if (c.started) {
+        $('countdown-label').hidden = true;
+        $('countdown-grid').hidden = true;
+        $('countdown-open').hidden = false;
+        clearInterval(countdownTimer);
+        return;
+      }
+      $('cd-d').textContent = c.d; $('cd-h').textContent = c.h; $('cd-m').textContent = c.m; $('cd-s').textContent = c.s;
+    };
+    tick();
+    countdownTimer = setInterval(tick, 1000);
   }
 
   // ---------- Le son ----------
   function renderPlaylists() {
-    const st = state.settings;
-    $('playlists').replaceChildren(...[['SPOTIFY', st.spotify], ['APPLE MUSIC', st.apple]].map(([name, url]) =>
+    const ev = state.event || {};
+    $('playlists').replaceChildren(...[['SPOTIFY', ev.spotifyUrl], ['APPLE MUSIC', ev.appleMusicUrl]].map(([name, url]) =>
       el('a', {
-        class: 'playlist', href: url || null, target: '_blank', rel: 'noopener',
+        class: 'playlist', href: url || null, target: url ? '_blank' : null, rel: 'noopener noreferrer',
         'aria-disabled': url ? 'false' : 'true',
         onclick: url ? null : e => e.preventDefault()
       },
@@ -176,9 +232,9 @@
     $('palette').replaceChildren(...PALETTE.map((p, i) => {
       const on = i === state.sw;
       return el('button', {
-        type: 'button', role: 'radio', class: 'swatch', 'aria-checked': String(on),
+        type: 'button', role: 'radio', class: 'swatch', 'aria-checked': String(on), 'aria-label': `${p.title} — ${p.name}`,
         style: { background: p.hex, color: p.fg },
-        onclick: () => { state.sw = i; renderPalette(); renderLooks(); }
+        onclick: () => { state.sw = i; renderPalette(); renderLooks(); $('palette').children[i].focus(); }
       },
       el('span', { class: 'swatch-name' }, p.name),
       on ? el('span', { class: 'swatch-body' },
@@ -200,14 +256,13 @@
   function renderLooks() {
     const sw = PALETTE[state.sw];
     const container = $('looks');
-    const existing = container.children;
     const items = LOOKS[state.gender];
     // Rebuild only when the gender changes so swatch changes animate the colour bar.
     if (container.dataset.gender !== state.gender) {
       container.dataset.gender = state.gender;
       container.replaceChildren(...items.map((l, i) =>
         el('figure', { class: 'look' },
-          el('div', { class: 'look-photo' }, el('image-slot', { id: `look-${state.gender}-${i}`, placeholder: l[2] })),
+          el('div', { class: 'look-photo', 'data-n': pad(i + 1) }, el('image-slot', { id: `look-${state.gender}-${i}`, placeholder: l[2], alt: l[0] })),
           el('div', { class: 'look-bar' }),
           el('figcaption', {},
             el('span', { class: 'look-meta' }, el('span', {}, pad(i + 1)), el('span', { class: 'look-sw' })),
@@ -215,7 +270,9 @@
             el('span', { class: 'look-note' }, l[1])))
       ));
     }
-    for (const fig of existing) {
+    container.style.setProperty('--look-tone', sw.hex);
+    container.style.setProperty('--look-fg', sw.fg);
+    for (const fig of container.children) {
       fig.querySelector('.look-bar').style.background = sw.hex;
       fig.querySelector('.look-sw').textContent = `IN ${sw.name}`;
     }
@@ -237,138 +294,159 @@
   // ---------- RSVP ----------
   function setError(id, msg) { const n = $(id); n.textContent = msg || ''; n.hidden = !msg; }
 
-  function openCode(raw, silent) {
-    const code = String(raw || '').trim().toUpperCase();
-    state.code = code;
-    $('code-input').value = code;
-    if (!code) return codeError('Enter the code from your invitation.');
-    const inv = load(K.inv, []).find(i => i.code === code);
-    if (!inv) return codeError(silent ? '' : 'We couldn’t find that invitation. Check the code and try again.');
-    if (inv.revoked) return codeError('This invitation is no longer active. Please contact the host.');
-    const prev = load(K.rsvp, {})[code];
-    codeError('');
-    Object.assign(state, {
-      invite: inv, hasPrevious: !!prev, step: prev ? 'done' : 'form', done: prev || null,
-      attendance: prev ? prev.attendance : 'yes',
-      count: prev ? Math.max(1, Math.min(prev.count || 1, inv.allocation)) : Math.min(1, inv.allocation)
-    });
-    $('name-input').value = prev ? prev.name : inv.name;
-    $('dietary-input').value = prev ? prev.dietary : '';
-    $('message-input').value = prev ? prev.message : '';
-    setError('form-error', '');
+  function showStep(step, focus) {
+    state.step = step;
+    for (const s of ['link', 'loading', 'form', 'done', 'closed']) $(`step-${s}`).hidden = s !== step;
     renderRsvp();
-  }
-
-  function codeError(msg) {
-    setError('code-error', msg);
-    $('code-input').setAttribute('aria-invalid', msg ? 'true' : 'false');
-  }
-
-  function submitRsvp() {
-    const inv = load(K.inv, []).find(i => i.code === state.code);
-    if (!inv || inv.revoked) return setError('form-error', 'This invitation is no longer active. Please contact the host.');
-    const name = $('name-input').value.trim().slice(0, 80);
-    if (!name) return setError('form-error', 'Please add your name.');
-    const count = state.attendance === 'no' ? 0 : Math.max(1, Math.min(inv.allocation, state.count | 0));
-    const rec = {
-      name, attendance: state.attendance, count,
-      dietary: $('dietary-input').value.trim().slice(0, 140),
-      message: $('message-input').value.trim().slice(0, 500),
-      at: new Date().toISOString()
-    };
-    state.saving = true; renderRsvp();
-    setTimeout(() => {
-      try {
-        const all = load(K.rsvp, {}); all[state.code] = rec; save(K.rsvp, all);
-        Object.assign(state, { saving: false, step: 'done', done: rec, hasPrevious: true, invite: inv });
-      } catch (e) {
-        state.saving = false;
-        setError('form-error', 'Your reply couldn’t be saved. Please try again.');
-      }
-      renderRsvp();
-    }, 450);
-  }
-
-  function renderRsvp() {
-    const s = state, inv = s.invite, alloc = inv ? inv.allocation : 1, done = s.done;
-    $('step-code').hidden = s.step !== 'code';
-    $('step-form').hidden = s.step !== 'form';
-    $('step-done').hidden = s.step !== 'done';
-
-    if (s.step === 'form') {
-      $('invite-first').textContent = inv ? first(inv.name) : '';
-      $('alloc-text').textContent = alloc > 1
-        ? `This invitation is for up to ${alloc} people, approved by the host.`
-        : 'This invitation is for you alone — one place, held in your name.';
-      $('has-previous').hidden = !s.hasPrevious;
-      $('att-options').replaceChildren(...['yes', 'maybe', 'no'].map(k =>
-        el('button', {
-          type: 'button', class: 'att', 'aria-pressed': String(s.attendance === k),
-          onclick: () => { state.attendance = k; setError('form-error', ''); renderRsvp(); }
-        }, el('span', { class: 'att-fr' }, ATT[k][0]), el('span', { class: 'att-en' }, ATT[k][1]))
-      ));
-      $('count-row').hidden = !(s.attendance !== 'no' && alloc > 1);
-      $('count-hint').textContent = `Up to ${alloc} on this invitation`;
-      $('count').textContent = s.count;
-      $('dec').disabled = s.count <= 1;
-      $('inc').disabled = s.count >= alloc;
-      $('submit-rsvp').disabled = s.saving;
-      $('submit-rsvp').textContent = s.saving ? 'ENVOI…' : 'ENVOYER MA RÉPONSE';
+    if (focus) {
+      const target = step === 'done' ? $('step-done') : step === 'form' ? $('att-options').querySelector('button') : null;
+      if (target) target.focus({ preventScroll: true });
     }
+  }
 
-    if (s.step === 'done' && done) {
-      $('done-first').textContent = first(done.name) + '.';
-      $('done-line').textContent = done.attendance === 'yes'
-        ? 'See you on the 23rd. The address will reach you privately.'
-        : done.attendance === 'maybe'
-          ? 'Noted as a maybe. Come back and confirm whenever you know.'
-          : 'We’ll miss you. Thank you for letting us know.';
-      $('done-att').textContent = `RÉPONSE — ${ATT[done.attendance][1]}`;
-      $('done-count').textContent = done.attendance !== 'no' ? `${done.count} ${done.count > 1 ? 'PERSONNES' : 'PERSONNE'}` : '';
-      $('add-cal').hidden = done.attendance === 'no';
+  async function loadInvite() {
+    showStep('loading');
+    const r = await api(`/api/invite/${state.token}`);
+    if (!r.ok) {
+      $('link-intro').textContent = r.status === 404 || r.status === 410
+        ? 'Your invitation could not be opened.'
+        : 'MAISON 23 is invitation-only. Open the personal link from your invitation — or paste it here.';
+      setError('link-error', r.data.message || 'We couldn’t open your invitation. Please refresh in a moment.');
+      return showStep('link');
     }
+    applyInvite(r.data);
+    personaliseGate();
+    if (r.data.rsvp) showStep('done');
+    else showStep(r.data.rsvpOpen ? 'form' : 'closed');
+  }
+
+  function applyInvite(data) {
+    state.invite = data;
+    state.event = data.event;
+    const rsvp = data.rsvp;
+    state.attendance = rsvp ? rsvp.attendance : null;
+    state.count = rsvp && rsvp.partySize > 0 ? Math.min(rsvp.partySize, data.guest.allocation) : 1;
+    $('dietary-input').value = rsvp ? rsvp.dietary : '';
+    $('message-input').value = rsvp ? rsvp.message : '';
+    renderPlaylists();
     renderVenue();
   }
 
+  async function submitRsvp() {
+    if (state.saving) return;
+    if (!state.attendance) return setError('form-error', 'Please choose whether you can come.');
+    state.saving = true; setError('form-error', ''); renderRsvp();
+    const r = await api(`/api/invite/${state.token}/rsvp`, {
+      method: 'POST',
+      body: JSON.stringify({
+        attendance: state.attendance,
+        partySize: state.attendance === 'no' ? 0 : state.count,
+        dietary: $('dietary-input').value,
+        message: $('message-input').value
+      })
+    });
+    state.saving = false;
+    if (!r.ok || !r.data.rsvp) {
+      // Nothing is confirmed unless the server says it saved the reply.
+      setError('form-error', (r.data && r.data.message) || 'Your reply couldn’t be saved. Please try again.');
+      return renderRsvp();
+    }
+    applyInvite(r.data);
+    showStep('done', true);
+  }
+
+  function renderRsvp() {
+    const inv = state.invite;
+    if (!inv) return;
+    const alloc = inv.guest.allocation, rsvp = inv.rsvp, ev = inv.event;
+
+    if (state.step === 'form') {
+      $('invite-first').textContent = inv.guest.firstName;
+      $('alloc-text').textContent = alloc > 1
+        ? `This invitation is for up to ${alloc} people, approved by the host.`
+        : 'This invitation is for you alone — one place, held in your name.';
+      $('deadline-text').hidden = !ev.rsvpDeadline;
+      if (ev.rsvpDeadline) $('deadline-text').textContent = `Kindly reply by ${dubai(ev.rsvpDeadline, { weekday: 'long', day: 'numeric', month: 'long' })}.`;
+      $('has-previous').hidden = !rsvp;
+      $('cancel-edit').hidden = !rsvp;
+      $('att-options').replaceChildren(...['yes', 'maybe', 'no'].map(k =>
+        el('button', {
+          type: 'button', class: 'att', 'aria-pressed': String(state.attendance === k),
+          onclick: () => { state.attendance = k; setError('form-error', ''); renderRsvp(); }
+        }, el('span', { class: 'att-fr' }, ATT[k][0]), el('span', { class: 'att-en' }, ATT[k][1]))
+      ));
+      $('count-row').hidden = !(state.attendance !== 'no' && alloc > 1);
+      $('count-hint').textContent = `Up to ${alloc} on this invitation`;
+      $('count').textContent = state.count;
+      $('dec').disabled = state.count <= 1;
+      $('inc').disabled = state.count >= alloc;
+      $('submit-rsvp').disabled = state.saving;
+      $('submit-rsvp').textContent = state.saving ? 'ENVOI…' : rsvp ? 'METTRE À JOUR' : 'ENVOYER MA RÉPONSE';
+    }
+
+    if (state.step === 'done' && rsvp) {
+      $('done-first').textContent = inv.guest.firstName + '.';
+      $('done-line').textContent = rsvp.attendance === 'yes'
+        ? 'See you on the 23rd. The address will reach you privately.'
+        : rsvp.attendance === 'maybe'
+          ? 'Noted as a maybe. Come back and confirm whenever you know.'
+          : 'We’ll miss you. Thank you for letting us know.';
+      if (rsvp.attendance === 'yes' && inv.venue) $('done-line').textContent = 'See you on the 23rd.';
+      $('done-att').textContent = `RÉPONSE — ${ATT[rsvp.attendance][2]}`;
+      $('done-count').textContent = rsvp.attendance !== 'no' ? `${rsvp.partySize} ${rsvp.partySize > 1 ? 'PERSONNES' : 'PERSONNE'}` : '';
+      $('done-dress').hidden = rsvp.attendance === 'no' || !ev.dressCode;
+      $('done-dress').textContent = `Dress code — ${ev.dressCode}`;
+      const v = inv.venue;
+      $('done-venue').hidden = !v;
+      if (v) {
+        $('done-venue').replaceChildren(
+          el('strong', {}, v.name),
+          el('span', { style: { whiteSpace: 'pre-line' } }, v.address),
+          v.mapsUrl ? el('a', { href: v.mapsUrl, target: '_blank', rel: 'noopener noreferrer' }, 'OUVRIR DANS GOOGLE MAPS →') : '');
+      }
+      $('add-cal').hidden = rsvp.attendance === 'no';
+      $('edit-rsvp').hidden = !inv.rsvpOpen;
+    }
+  }
+
   function initRsvp() {
-    $('code-input').addEventListener('input', e => {
-      const pos = e.target.selectionStart;
-      e.target.value = e.target.value.toUpperCase();
-      e.target.setSelectionRange(pos, pos);
-      state.code = e.target.value;
-      codeError('');
+    $('step-link').addEventListener('submit', e => {
+      e.preventDefault();
+      const raw = $('link-input').value.trim();
+      const m = raw.match(/([A-Za-z0-9_-]{32})\/?$/);
+      if (!m) return setError('link-error', 'That doesn’t look like a MAISON 23 invitation link. Copy the full link from your invitation.');
+      location.assign(`/invite/${m[1]}#rsvp`);
     });
-    $('step-code').addEventListener('submit', e => { e.preventDefault(); openCode($('code-input').value); });
+    $('link-input').addEventListener('input', () => setError('link-error', ''));
     $('step-form').addEventListener('submit', e => { e.preventDefault(); submitRsvp(); });
-    $('name-input').addEventListener('input', () => setError('form-error', ''));
     $('dec').addEventListener('click', () => { state.count = Math.max(1, state.count - 1); renderRsvp(); });
-    $('inc').addEventListener('click', () => { state.count = Math.min(state.invite ? state.invite.allocation : 1, state.count + 1); renderRsvp(); });
-    $('reset-code').addEventListener('click', () => {
-      Object.assign(state, { step: 'code', invite: null, code: '', done: null, hasPrevious: false });
-      $('code-input').value = '';
-      renderRsvp();
-    });
-    $('edit-rsvp').addEventListener('click', () => { state.step = 'form'; renderRsvp(); });
+    $('inc').addEventListener('click', () => { state.count = Math.min(state.invite.guest.allocation, state.count + 1); renderRsvp(); });
+    $('edit-rsvp').addEventListener('click', () => showStep('form', true));
+    $('cancel-edit').addEventListener('click', () => { applyInvite(state.invite); showStep('done', true); });
     $('add-cal').addEventListener('click', addCal);
-    $('copy-invite').addEventListener('click', e =>
-      copy(`${baseUrl()}?invite=${encodeURIComponent(state.code)}`, e.currentTarget, 'COPIER MON LIEN'));
-    $('copy-site').addEventListener('click', e => copy(baseUrl(), e.currentTarget, 'COPIER LE LIEN'));
+    $('copy-invite').addEventListener('click', e => copy(location.origin + location.pathname, e.currentTarget, 'COPIER MON LIEN'));
+    // Share the public site, never the personal invitation link.
+    $('copy-site').addEventListener('click', e => copy(location.origin + '/', e.currentTarget, 'COPIER LE LIEN'));
   }
 
   // ---------- Venue ----------
   function renderVenue() {
-    const st = state.settings, done = state.done, inv = state.invite;
-    const visible = !!(done && done.attendance === 'yes' && inv && !inv.revoked && st.venueName);
-    $('venue-visible').hidden = !visible;
-    $('venue-hidden').hidden = visible;
-    $('venue-name').textContent = st.venueName || '';
-    $('venue-address').textContent = st.venueAddress || '';
-    $('venue-notes').textContent = st.venueNotes || '';
+    const inv = state.invite;
+    const v = inv && inv.venue;
+    const confirmed = inv && inv.rsvp && inv.rsvp.attendance === 'yes';
+    $('venue-visible').hidden = !v;
+    $('venue-hidden').hidden = Boolean(v);
+    if (v) {
+      $('venue-name').textContent = v.name;
+      $('venue-address').textContent = v.address;
+      $('venue-map').hidden = !v.mapsUrl;
+      if (v.mapsUrl) $('venue-map').href = v.mapsUrl;
+    } else if (confirmed) {
+      $('venue-pending-text').textContent = 'Your place is confirmed. The address will appear here, on your personal invitation, as soon as the host shares it.';
+    }
   }
 
   // ---------- Utilities ----------
-  const baseUrl = () => location.origin + location.pathname;
-
   function copy(text, btn, label) {
     const ok = () => { btn.textContent = 'LIEN COPIÉ'; setTimeout(() => { btn.textContent = label; }, 2200); };
     const fallback = () => {
@@ -380,14 +458,20 @@
   }
 
   function addCal() {
-    const st = state.settings;
-    const loc = state.done && state.done.attendance === 'yes' && st.venueName ? `${st.venueName}, ${st.venueAddress || 'Dubai'}` : 'Dubai, UAE';
+    const ev = (state.invite && state.invite.event) || state.event || {};
+    const v = state.invite && state.invite.venue;
+    const utc = iso => new Date(iso).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const icsText = s => String(s).replace(/\\/g, '\\\\').replace(/[,;]/g, m => '\\' + m).replace(/\r?\n/g, '\\n');
+    const loc = v ? `${v.name}, ${v.address}` : 'Dubai, UAE';
     const ics = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MAISON 23//FR', 'BEGIN:VEVENT', 'UID:maison23-20261023@maison23',
-      'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z',
-      'DTSTART:20261023T160000Z', 'DTEND:20261023T220000Z', 'SUMMARY:MAISON 23 — La nuit est à nous.',
-      'LOCATION:' + loc.replace(/,/g, '\\,').replace(/\n/g, ' '),
-      'DESCRIPTION:Une soirée privée. Address shared privately with confirmed guests.', 'END:VEVENT', 'END:VCALENDAR'
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MAISON 23//FR', 'BEGIN:VEVENT', 'UID:maison23-20261023@maison23.club',
+      'DTSTAMP:' + utc(new Date().toISOString()),
+      'DTSTART:' + utc(ev.startsAt || '2026-10-23T20:00:00+04:00'),
+      'DTEND:' + utc(ev.endsAt || '2026-10-24T02:00:00+04:00'),
+      'SUMMARY:' + icsText('MAISON 23 — La nuit est à nous.'),
+      'LOCATION:' + icsText(loc),
+      'DESCRIPTION:' + icsText(`Une soirée privée.${ev.dressCode ? ' Dress code: ' + ev.dressCode : ''}${v ? '' : ' The address is shared privately with confirmed guests.'}`),
+      'END:VEVENT', 'END:VCALENDAR'
     ].join('\r\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
@@ -405,7 +489,7 @@
       c.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
       const hot = e.target.closest && e.target.closest('a,button,[role=radio],input,textarea');
       c.classList.toggle('hot', !!hot);
-    });
+    }, { passive: true });
     document.addEventListener('mouseleave', () => { c.style.opacity = '0'; });
   }
 
@@ -427,12 +511,9 @@
   }
 
   // ---------- Boot ----------
-  try { if (!localStorage.getItem(K.inv)) save(K.inv, SEED); } catch (e) {}
-  state.settings = load(K.set, {});
-
   initGate();
+  initMenu();
   $('sound-toggle').addEventListener('click', toggleSound);
-  tick(); setInterval(tick, 1000);
   renderPlaylists();
   renderArtists();
   renderPalette();
@@ -440,14 +521,22 @@
   renderLooks();
   renderTimeline();
   initRsvp();
-  renderRsvp();
 
-  const param = new URLSearchParams(location.search).get('invite');
-  if (param) openCode(param, true);
-
-  addEventListener('storage', e => {
-    if (e.key === K.set) { state.settings = load(K.set, {}); renderPlaylists(); renderVenue(); }
+  // Countdown: show a quiet loading state until the event time is known (fallback after 2.5s).
+  let countdownStarted = false;
+  const startOnce = iso => { if (!countdownStarted || iso) { countdownStarted = true; startCountdown(iso); } };
+  const fallback = setTimeout(() => startOnce(null), 2500);
+  api('/api/event').then(r => {
+    if (r.ok) { state.event = r.data; renderPlaylists(); }
+    clearTimeout(fallback);
+    startOnce(r.ok ? r.data.startsAt : null);
   });
+
+  if (state.token) loadInvite();
+  else {
+    if (pathMatch) setError('link-error', 'That invitation link isn’t complete. Copy the full link from your invitation.');
+    showStep('link');
+  }
 
   setupCursor();
   setTimeout(setupReveal, 300);

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAISON 23 — Espace hôte</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#171016">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/host.css">
+<script src="/host.js" defer></script>
+</head>
+<body>
+
+<!-- LOCK -->
+<div id="lock" class="lock" hidden>
+  <form id="unlock-form" class="lock-card">
+    <div class="kicker">ESPACE HÔTE — PRIVATE SOCIETY</div>
+    <h1 class="lock-title">MAISON <em>23</em></h1>
+    <label class="field">
+      <span class="label">MOT DE PASSE</span>
+      <input id="pw" type="password" class="input-line input-lg" autocomplete="current-password" required>
+    </label>
+    <p id="pw-error" class="error" role="alert" hidden></p>
+    <button type="submit" id="pw-submit" class="btn-ivory">ENTRER</button>
+  </form>
+</div>
+
+<!-- DASHBOARD -->
+<div id="app" class="wrap" hidden>
+  <header class="head">
+    <div class="head-left">
+      <div class="kicker">ESPACE HÔTE — VENDREDI 23.10.2026</div>
+      <h1 class="head-title">La liste.</h1>
+    </div>
+    <div class="head-actions">
+      <a href="/" class="btn-outline" target="_blank" rel="noopener">VOIR LE SITE</a>
+      <a href="/api/admin/export.csv" class="btn-gold" download>EXPORTER CSV</a>
+      <button type="button" id="logout" class="btn-text">DÉCONNEXION</button>
+    </div>
+  </header>
+
+  <div id="email-banner" class="banner" hidden></div>
+
+  <section id="stats" class="stats" aria-label="Résumé"></section>
+  <div class="alloc">
+    <div class="alloc-head"><span>ATTENDUS / CAPACITÉ</span><span id="alloc-count"></span></div>
+    <div class="alloc-track"><div id="alloc-bar" class="alloc-bar"></div></div>
+    <p id="alloc-note" class="hint"></p>
+  </div>
+
+  <!-- INVITATIONS -->
+  <section class="invites" aria-labelledby="inv-h">
+    <div class="invites-head">
+      <h2 id="inv-h" class="h2">Invitations</h2>
+      <div class="toolbar">
+        <input id="search" class="input-line search" type="search" placeholder="Rechercher un nom, email, téléphone…" aria-label="Rechercher">
+      </div>
+    </div>
+    <div id="filters" class="filters" role="tablist" aria-label="Filtrer"></div>
+
+    <div class="create-wrap">
+      <form id="create-form" class="create">
+        <label class="field"><span class="label">NOM DE L'INVITÉ·E</span><input id="new-name" class="input-line" placeholder="Prénom Nom" required maxlength="120"></label>
+        <label class="field"><span class="label">EMAIL</span><input id="new-email" type="email" class="input-line" placeholder="optionnel" maxlength="254"></label>
+        <label class="field"><span class="label">WHATSAPP</span><input id="new-phone" type="tel" class="input-line" placeholder="+971…" maxlength="40"></label>
+        <label class="field"><span class="label">PLACES</span><input id="new-alloc" type="number" min="1" max="10" value="1" class="input-line"></label>
+        <button type="submit" class="btn-ivory btn-sm">AJOUTER</button>
+      </form>
+      <div class="import">
+        <label class="btn-outline btn-file">IMPORTER UN CSV<input id="csv-file" type="file" accept=".csv,text/csv"></label>
+        <span class="hint">Colonnes : <code>name</code>, <code>email</code>, <code>phone</code>, <code>places</code>. Aucune invitation n'est envoyée à l'import.</span>
+      </div>
+    </div>
+    <p id="create-msg" class="create-msg" role="status" hidden></p>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>INVITÉ·E</th><th>PLACES</th><th>RSVP</th><th>NOTES</th><th>INVITATION</th><th class="right">ACTIONS</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p id="empty" class="empty" hidden>Personne ici pour l'instant.</p>
+    </div>
+  </section>
+
+  <!-- MESSAGES -->
+  <section class="sends" aria-labelledby="send-h">
+    <h2 id="send-h" class="h2">Messages</h2>
+    <p class="hint">Nothing is ever sent automatically. Each send shows its recipients first and asks you to confirm.</p>
+    <div class="sends-grid">
+      <div class="send-card">
+        <h3 class="h3">Relance</h3>
+        <p class="hint">Email a gentle reminder to guests who were invited but haven't replied (skips anyone reminded in the last 24 hours).</p>
+        <button type="button" id="reminder-preview" class="btn-outline">PRÉPARER LA RELANCE</button>
+        <div id="reminder-confirm" class="confirm" hidden></div>
+      </div>
+      <form id="update-form" class="send-card">
+        <h3 class="h3">Nouvelles de la soirée</h3>
+        <p class="hint">Send an update by email to confirmed guests. The same update is never sent twice to the same person.</p>
+        <label class="field"><span class="label">OBJET</span><input id="update-subject" class="input-line" maxlength="120" placeholder="The address is in"></label>
+        <label class="field"><span class="label">MESSAGE</span><textarea id="update-body" class="input-area" rows="5" maxlength="4000" placeholder="Write your update…"></textarea></label>
+        <button type="submit" class="btn-outline">PRÉPARER L'ENVOI</button>
+        <div id="update-confirm" class="confirm" hidden></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- EVENT SETTINGS + WORDS -->
+  <section class="bottom">
+    <form id="settings-form" class="settings">
+      <h2 class="h2">La soirée</h2>
+      <p class="hint">All times are Dubai time (GST, UTC+4).</p>
+      <div class="grid-2">
+        <label class="field"><span class="label">DÉBUT</span><input id="startsAt" type="datetime-local" class="input-line" required></label>
+        <label class="field"><span class="label">FIN</span><input id="endsAt" type="datetime-local" class="input-line" required></label>
+        <label class="field"><span class="label">DATE LIMITE RSVP <span class="opt">— OPTIONNEL</span></span><input id="rsvpDeadline" type="datetime-local" class="input-line"></label>
+        <label class="field"><span class="label">CAPACITÉ (MAX <span id="max-cap">40</span>)</span><input id="capacity" type="number" min="1" max="40" class="input-line" required></label>
+      </div>
+      <label class="field"><span class="label">DRESS CODE</span><input id="dressCode" class="input-line" maxlength="200"></label>
+
+      <h3 class="h3 h3-gap">Le lieu</h3>
+      <p class="hint">Private. Never shown on the public site. When sharing is on, only guests who replied “I’ll be there” see it on their personal invitation.</p>
+      <label class="field"><span class="label">NOM DU LIEU</span><input id="venueName" class="input-line" maxlength="120"></label>
+      <label class="field"><span class="label">ADRESSE</span><textarea id="venueAddress" rows="2" class="input-area" maxlength="300"></textarea></label>
+      <label class="field"><span class="label">LIEN GOOGLE MAPS</span><input id="mapsUrl" type="url" class="input-line" placeholder="https://maps.app.goo.gl/…" maxlength="500"></label>
+      <label class="toggle"><input id="venueShared" type="checkbox"><span>Partager l'adresse avec les invité·es confirmé·es</span></label>
+
+      <h3 class="h3 h3-gap">Le son</h3>
+      <label class="field"><span class="label">SPOTIFY PLAYLIST URL</span><input id="spotifyUrl" type="url" class="input-line" placeholder="https://open.spotify.com/playlist/…" maxlength="500"></label>
+      <label class="field"><span class="label">APPLE MUSIC PLAYLIST URL</span><input id="appleMusicUrl" type="url" class="input-line" placeholder="https://music.apple.com/…" maxlength="500"></label>
+      <div class="save-row">
+        <button type="submit" class="btn-ivory btn-sm">ENREGISTRER</button>
+        <span id="saved-msg" class="saved" role="status"></span>
+      </div>
+    </form>
+    <div class="side">
+      <div class="messages">
+        <h2 class="h2">Les mots</h2>
+        <p class="hint">Messages guests left for you.</p>
+        <div id="messages" class="messages-list"></div>
+      </div>
+      <div class="activity">
+        <h2 class="h2">Activité</h2>
+        <ol id="activity" class="activity-list"></ol>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- GUEST PANEL -->
+<dialog id="guest-dialog" class="dialog" aria-labelledby="gd-name">
+  <form method="dialog" class="dialog-close"><button class="btn-text" aria-label="Fermer">FERMER ✕</button></form>
+  <div id="gd-body"></div>
+</dialog>
+</body>
+</html>

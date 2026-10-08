@@ -321,3 +321,66 @@ h2 em, h3 em { color: var(--gold); }
 /* ---------- Custom cursor ---------- */
 .cursor { position: fixed; left: 0; top: 0; width: 28px; height: 28px; margin: -14px 0 0 -14px; border: 1px solid var(--gold); border-radius: 50%; pointer-events: none; z-index: 200; transition: width .3s, height .3s, margin .3s, background .3s, opacity .3s; opacity: 0; mix-blend-mode: difference; }
 .cursor.hot { width: 52px; height: 52px; margin: -26px 0 0 -26px; background: rgba(190, 154, 104, .18); }
+
+/* ---------- V2: invitation gate ---------- */
+.gate-guest { font-family: var(--serif); font-style: italic; font-size: clamp(24px, 3.6vw, 40px); color: var(--gold); animation: m23fade 1.4s 1s both; }
+
+/* ---------- V2: mobile chapter menu ---------- */
+.menu-btn { display: none; width: 40px; height: 40px; border: 0; background: none; cursor: pointer; position: relative; padding: 0; }
+.menu-btn span { position: absolute; left: 10px; right: 10px; height: 1px; background: currentColor; transition: transform .35s var(--ease), top .35s var(--ease); }
+.menu-btn span:first-child { top: 16px; }
+.menu-btn span:last-child { top: 23px; }
+.menu-btn[aria-expanded="true"] span:first-child { top: 20px; transform: rotate(45deg); }
+.menu-btn[aria-expanded="true"] span:last-child { top: 20px; transform: rotate(-45deg); }
+.menu { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 55; background: var(--night); padding: 96px clamp(20px, 6vw, 40px) 40px; display: flex; flex-direction: column; justify-content: center; gap: 4px; overflow-y: auto; animation: m23fade .4s both; }
+.menu a { display: flex; align-items: baseline; gap: 18px; font-family: var(--serif); font-size: clamp(34px, 9vw, 52px); line-height: 1.15; padding: 6px 0; border-bottom: 1px solid rgba(190, 154, 104, .15); }
+.menu a span { font-family: var(--sans); font-size: 10.5px; letter-spacing: .26em; color: var(--gold); min-width: 22px; }
+body.menu-open { overflow: hidden; }
+@media (max-width: 859px) {
+  .menu-btn { display: block; }
+  .sound-btn { padding: 8px 0; }
+  .nav-right { gap: 10px; }
+}
+@media (max-width: 380px) { #sound-label { display: none; } }
+@media (min-width: 860px) { .menu { display: none !important; } }
+
+/* ---------- V2: countdown states ---------- */
+.countdown.is-loading .cd-num { opacity: .35; }
+.cd-num { transition: opacity .6s; }
+.countdown-open { margin: 0; font-family: var(--serif); font-style: italic; font-size: clamp(30px, 4.4vw, 56px); line-height: 1; color: var(--gold); letter-spacing: -.01em; animation: m23fade 1s both; }
+
+/* ---------- V2: RSVP ---------- */
+.card-lede { margin: 0; font-size: 14px; line-height: 1.6; color: var(--choc); }
+.step-loading { gap: 12px; }
+.greet-kicker { margin: 0 0 4px; font-size: 10.5px; letter-spacing: .3em; color: var(--burgundy); }
+.greet-when { margin: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); }
+.att { padding: 14px 4px; }
+.att-fr { font-size: clamp(14px, 3.7vw, 20px); line-height: 1.15; text-align: center; white-space: nowrap; }
+@media (max-width: 360px) { .att-fr { white-space: normal; } }
+.att:focus-visible, .btn-dark:focus-visible, .btn-outline:focus-visible, .stepper button:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 2px; }
+.input-line:focus-visible, .input-area:focus-visible { outline: none; box-shadow: 0 1px 0 0 var(--burgundy); }
+.done-note { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--choc); }
+.done-venue { display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(100, 40, 61, .35); padding: 16px 18px; font-size: 14px; line-height: 1.6; }
+.done-venue strong { font-family: var(--serif); font-weight: 400; font-size: 22px; }
+.done-venue a { color: var(--burgundy); font-size: 10.5px; letter-spacing: .22em; }
+.btn-dark:disabled { opacity: .6; }
+.venue-map { font-size: 10.5px; letter-spacing: .22em; color: var(--gold); }
+
+/* ---------- V2: photos not yet supplied ---------- */
+/* Editorial frames collapse until a photo exists, so guests never see wireframe boxes. */
+.cover-portrait:has(image-slot[empty]),
+.story-figure:has(image-slot[empty]),
+.city-photo:has(image-slot[empty]),
+.kin-photo:has(image-slot[empty]),
+.pap-photo:has(image-slot[empty]) { display: none; }
+.cover-grid:has(.cover-portrait image-slot[empty]) { align-items: center; }
+.cover-grid:has(.cover-portrait image-slot[empty]) .cover-copy { align-items: center; text-align: center; max-width: 720px; width: 100%; margin: 0 auto; }
+.cover-grid:has(.cover-portrait image-slot[empty]) .cover-lede { margin: 0 auto; }
+.cover-grid:has(.cover-portrait image-slot[empty]) .countdown { width: 100%; text-align: left; }
+.story-grid:has(.story-figure image-slot[empty]) { grid-template-columns: minmax(0, 1fr); }
+.story-grid:has(.story-figure image-slot[empty]) .story-text { padding-top: 0; max-width: 32ch; margin-left: auto; }
+@media (max-width: 859px) { .story-grid:has(.story-figure image-slot[empty]) .story-text { margin-left: 0; } }
+/* Moodboard cards without a photo become a tonal panel in the selected palette colour. */
+.look-photo { overflow: hidden; }
+.look-photo:has(image-slot[empty]) { aspect-ratio: 3 / 2; background: var(--look-tone, var(--burgundy)); transition: background .6s; }
+.look-photo:has(image-slot[empty])::after { content: attr(data-n); position: absolute; right: 14px; bottom: 6px; font-family: var(--serif); font-style: italic; font-size: 64px; line-height: 1; color: var(--look-fg, var(--ivory)); opacity: .55; }
