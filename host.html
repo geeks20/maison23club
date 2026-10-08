@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAISON 23 — Espace hôte</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="host.css">
+<script src="host.js" defer></script>
+</head>
+<body>
+
+<!-- LOCK -->
+<div id="lock" class="lock">
+  <form id="unlock-form" class="lock-card">
+    <div class="kicker">ESPACE HÔTE</div>
+    <h1 class="lock-title">MAISON <em>23</em></h1>
+    <label class="field">
+      <span class="label">MOT DE PASSE</span>
+      <input id="pw" type="password" class="input-line input-lg" autocomplete="current-password">
+    </label>
+    <p id="pw-error" class="error" role="alert" hidden></p>
+    <button type="submit" class="btn-ivory">ENTRER</button>
+    <p class="fine">Prototype gate — demo password <strong>maison23</strong>. Production uses server-side authentication (e.g. Supabase Auth magic link); no credentials live in the page.</p>
+  </form>
+</div>
+
+<!-- DASHBOARD -->
+<div id="app" class="wrap" hidden>
+  <header class="head">
+    <div class="head-left">
+      <div class="kicker">ESPACE HÔTE — 23.10.2026</div>
+      <h1 class="head-title">La liste.</h1>
+    </div>
+    <div class="head-actions">
+      <a href="index.html" class="btn-outline">VOIR LE SITE</a>
+      <button type="button" id="export" class="btn-gold">EXPORTER CSV</button>
+      <button type="button" id="logout" class="btn-text">DÉCONNEXION</button>
+    </div>
+  </header>
+
+  <section id="stats" class="stats" aria-label="Résumé"></section>
+  <div class="alloc">
+    <div class="alloc-head"><span>PLACES ALLOUÉES</span><span id="alloc-count"></span></div>
+    <div class="alloc-track"><div id="alloc-bar" class="alloc-bar"></div></div>
+    <p id="alloc-over" class="error" hidden></p>
+  </div>
+
+  <section class="invites">
+    <div class="invites-head">
+      <h2 class="h2">Invitations</h2>
+      <div id="filters" class="filters" role="tablist"></div>
+    </div>
+
+    <form id="create-form" class="create">
+      <label class="field"><span class="label">NOM DE L'INVITÉ·E</span><input id="new-name" class="input-line" placeholder="Prénom Nom"></label>
+      <label class="field"><span class="label">PLACES</span><input id="new-alloc" type="number" min="1" max="4" value="1" class="input-line"></label>
+      <label class="field"><span class="label">CODE (AUTO)</span><input id="new-code" class="input-line upper" placeholder="M23-…"></label>
+      <button type="submit" class="btn-ivory btn-sm">CRÉER</button>
+    </form>
+    <p id="create-msg" class="create-msg" role="status" hidden></p>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr><th>INVITÉ·E</th><th>CODE</th><th>PLACES</th><th>STATUT</th><th>VIENNENT</th><th>NOTES</th><th class="right">ACTIONS</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p id="empty" class="empty" hidden>Personne ici pour l'instant.</p>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <form id="settings-form" class="settings">
+      <h2 class="h2">Le lieu</h2>
+      <p class="hint">Shown only to guests who replied “Oui”, on their personal invitation.</p>
+      <label class="field"><span class="label">NOM DU LIEU</span><input id="venueName" class="input-line"></label>
+      <label class="field"><span class="label">ADRESSE</span><textarea id="venueAddress" rows="2" class="input-area"></textarea></label>
+      <label class="field"><span class="label">NOTES (ACCÈS, PARKING…)</span><textarea id="venueNotes" rows="2" class="input-area"></textarea></label>
+      <h2 class="h2 h2-gap">Le son</h2>
+      <label class="field"><span class="label">SPOTIFY PLAYLIST URL</span><input id="spotify" type="url" class="input-line" placeholder="https://open.spotify.com/playlist/…"></label>
+      <label class="field"><span class="label">APPLE MUSIC PLAYLIST URL</span><input id="apple" type="url" class="input-line" placeholder="https://music.apple.com/…"></label>
+      <div class="save-row">
+        <button type="submit" class="btn-ivory btn-sm">ENREGISTRER</button>
+        <span id="saved-msg" class="saved" role="status"></span>
+      </div>
+    </form>
+    <div class="messages">
+      <h2 class="h2">Les mots</h2>
+      <p class="hint">Messages guests left for you.</p>
+      <div id="messages" class="messages-list"></div>
+      <p class="fine fine-rule">Prototype: data lives in this browser's storage and is shared with the guest site on this device only. Production setup — database, auth and server-side RSVP validation — is required before sending invitations.</p>
+    </div>
+  </section>
+</div>
+</body>
+</html>
