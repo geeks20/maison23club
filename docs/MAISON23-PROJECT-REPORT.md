@@ -24,9 +24,9 @@
 
 | | Status |
 |---|---|
-| **Live site (today)** | **Version 1**: the original static site. Online at `maison23.club` and `maison23-production.up.railway.app`. |
-| **Version 2** | **Built and tested, not deployed.** On the GitHub branch `v2`. The **Neon** database is created and tested; going live needs your approval. |
-| **RSVPs on the live site** | ⚠️ **Not collected.** V1 saves replies only in each guest's own browser. **Don't send invitations until V2 is live.** |
+| **Live site (today)** | **Version 2 is live** (commit `0209495`) at `maison23.club`, running on Railway in **Singapore**, next to its **Neon** database. |
+| **Version 2** | **Deployed 8 Oct 2026**, after a production check: invitation, reply, change of reply, host view, revoke. RSVP saves take 0.3–0.5 s from Dubai. |
+| **RSVPs on the live site** | ✅ **Saved to the database.** Add guests in `/host`, then send their personal links. Email is **off** until Resend is set up. |
 | **Database** | **Neon** project `maison23` (Singapore). The `production` branch is ready for the live site; the `dev` branch is for testing. |
 | **Automated tests (V2)** | **31 / 31 passing**, both on local Postgres and on **Neon**. Every invitation, RSVP, host, email and security check. |
 | **Browser checks (V2)** | **33 / 33 passing** in real Chrome: the phone RSVP flow and the desktop host dashboard. |
@@ -77,6 +77,17 @@
 12. Built a real server and database, personal invitation links, a server-side RSVP and a full host dashboard (section 5).
 13. Wrote 31 automated tests and ran the guest and host flows in real Chrome (section 6).
 14. **Did all V2 work on a separate branch, `v2`**, pushed to GitHub. Railway deploys only `main`, so production hasn't changed.
+
+### Phase 5 — Go-live (8 Oct 2026)
+18. **Set the Railway variables** (pooled and direct Neon `production` strings, host password, `PUBLIC_BASE_URL`, `EMAIL_MODE=off`, `NODE_ENV`). Secrets were piped in from the CLI and never shown. The host password is in the git-ignored file `.env.production.local`.
+19. **Moved Railway to Singapore** (`asia-southeast1`) and pinned the region in `railway.json`.
+20. **Fast-forwarded `main` to V2** (`0209495`) on GitHub. Railway didn't pick up the push: its GitHub app doesn't seem to receive events for this repo. So I deployed that exact commit through Railway's API. The build and health check passed.
+21. **Checked production:**
+    - health, pages and API respond on both addresses
+    - security headers are present
+    - tables were created on Neon `production`
+    - a labelled test guest went through invitation → reply → change → host view → revoke, and is now revoked. It shows only under "Revoked" and isn't counted.
+22. **The photo pipeline from the other Claude session wasn't shipped.** It's still in progress and uncommitted, so it can go out in a later deploy.
 
 ### Phase 4 — Neon database
 15. **Created the Neon project `maison23`** in your *Emam* organization:
@@ -458,9 +469,10 @@ npm test
 - [x] Neon database (`production` + `dev` branches), tested end to end
 
 ### ⚙️ Still needs configuration
-- [ ] **Neon `production` connection strings on Railway** (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`)
-- [ ] **Railway region → Singapore** (next to the database)
-- [ ] **`ADMIN_PASSWORD`** and **`PUBLIC_BASE_URL`** on Railway
+- [x] **Neon `production` connection strings on Railway** (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`)
+- [x] **Railway region → Singapore** (next to the database)
+- [x] **`ADMIN_PASSWORD` and `PUBLIC_BASE_URL` on Railway** (the password is in `.env.production.local`)
+- [ ] **Fix GitHub auto-deploy:** in Railway → service → Settings → Source, reconnect `geeks20/maison23club` and grant the Railway GitHub app access. Until then, deploys have to be triggered by hand.
 - [ ] **Resend:** account, domain verification (DNS in Cloudflare), API key, webhook
 - [ ] **`www.maison23.club`:** the record is gone. Re-add `CNAME www → xwcbyenj.up.railway.app` (DNS only), or redirect `www` to the root domain in Cloudflare.
 - [ ] **Photos** in `public/images/` (named by slot, see README), the **share image** `og-maison23.jpg`, and the **approved logo files** (monogram and wordmark)
@@ -469,7 +481,7 @@ npm test
 
 ### 🔐 Needs your approval
 - [x] **Database: Neon** (created on your plan, project `maison23`)
-- [ ] **Merge `v2` → `main`**, which deploys V2 to production
+- [x] **Merge `v2` → `main`** and deploy V2 to production (done 8 Oct 2026)
 - [ ] **Turn on `EMAIL_MODE=test`**, then **`live`**
 - [ ] **Send the first real invitations.** I recommend 1–2 trusted guests first.
 - [ ] **Share the venue** (the toggle in the dashboard)
