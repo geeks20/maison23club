@@ -88,6 +88,12 @@
     - tables were created on Neon `production`
     - a labelled test guest went through invitation → reply → change → host view → revoke, and is now revoked. It shows only under "Revoked" and isn't counted.
 22. **The photo pipeline from the other Claude session wasn't shipped.** It's still in progress and uncommitted, so it can go out in a later deploy.
+23. **Photos committed on `v2` (commit `8142367`, 8 Oct 2026):**
+    - 39 licensed editorial photos (free Unsplash licence, Wikimedia Commons CC0 / CC BY / CC BY-SA)
+    - `assets/photos.json` is the single record of each photo's source, creator, licence, alt text and focal point
+    - `tools/build-images.py` builds graded responsive WebP, the manifest and the `/credits` page
+    - 9 Oct: 31 / 31 tests pass, and `/credits`, the manifest and the WebP files serve correctly on a local server
+    - **Not deployed yet.** `main` and the live site don't have the photos yet: `/credits` returns 404 on maison23.club.
 
 ### Phase 4 — Neon database
 15. **Created the Neon project `maison23`** in your *Emam* organization:
@@ -389,7 +395,7 @@ I checked the live V1 code and its behaviour directly, without assuming anything
 - **15. Production deploy of V2:** needs the Neon variables on Railway and the merge to `main`. Checked locally against Neon: start-up, schema setup, health check, guest and host flows.
 - **A real email send through Resend, and real webhooks:** waiting for your Resend account and domain verification.
 - **Real phones** (iOS Safari, Android Chrome), a screen reader, and load testing.
-- **Photos:** none supplied yet, so the photo layouts were checked only with empty frames.
+- **Photos:** committed (`8142367`) and checked on a local server, **not yet on the live site**.
 
 ---
 
@@ -475,7 +481,9 @@ npm test
 - [ ] **Fix GitHub auto-deploy:** in Railway → service → Settings → Source, reconnect `geeks20/maison23club` and grant the Railway GitHub app access. Until then, deploys have to be triggered by hand.
 - [ ] **Resend:** account, domain verification (DNS in Cloudflare), API key, webhook
 - [ ] **`www.maison23.club`:** the record is gone. Re-add `CNAME www → xwcbyenj.up.railway.app` (DNS only), or redirect `www` to the root domain in Cloudflare.
-- [ ] **Photos** in `public/images/` (named by slot, see README), the **share image** `og-maison23.jpg`, and the **approved logo files** (monogram and wordmark)
+- [x] **Photos** in `public/images/`: 39 licensed photos, credits at `/credits` (committed; **needs deploying**)
+- [ ] **Deploy the photos:** `git push origin v2:main`, then `railway up --detach`
+- [ ] The **share image** `og-maison23.jpg` and the **approved logo files** (monogram and wordmark)
 - [ ] **Event details in the dashboard:** venue, Maps link, RSVP deadline, playlists, capacity (35 by default)
 - [ ] **Delete the Cloudflare API token** in Cloudflare once you no longer need it. The current one **never expires**. Then remove `env.local`.
 
